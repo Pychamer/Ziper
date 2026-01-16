@@ -89,6 +89,31 @@
     const q = prompt("Ziper AI:");
     if(!q) return;
 
+    // Helper to create styled close button
+    const makeCloseBtn = () => {
+      const btn = document.createElement("button");
+      btn.id = "closeAI";
+      btn.textContent = "Close";
+      btn.style = "margin-top:8px;padding:6px 12px;background:#5865F2;border:none;border-radius:6px;color:white;cursor:pointer;";
+      return btn;
+    };
+
+    // Helper to update box content safely (prevents XSS)
+    const updateBox = (content, isError = false) => {
+      box.innerHTML = "";
+      if(typeof content === "string") {
+        const textDiv = document.createElement("div");
+        textDiv.textContent = content;
+        if(!isError) textDiv.style = "white-space:pre-wrap;word-wrap:break-word;";
+        box.appendChild(textDiv);
+      } else {
+        box.appendChild(content);
+      }
+      const closeBtn = makeCloseBtn();
+      closeBtn.onclick = () => box.remove();
+      box.appendChild(closeBtn);
+    };
+
     const box = document.createElement("div");
     box.style = `
       position:fixed;top:50%;left:50%;
@@ -98,9 +123,8 @@
       z-index:99999999;width:360px;
       max-height:400px;overflow-y:auto;
     `;
-    box.innerHTML = "🤔 Thinking…<br><button id='closeAI' style='margin-top:8px;padding:6px 12px;background:#5865F2;border:none;border-radius:6px;color:white;cursor:pointer;'>Close</button>";
+    updateBox("🤔 Thinking…");
     document.body.appendChild(box);
-    box.querySelector("#closeAI").onclick = () => box.remove();
 
     try {
       // Try Hugging Face API with better error handling
@@ -126,8 +150,7 @@
         
         // Handle model loading
         if(res.status === 503 || errorData.error?.includes("loading")) {
-          box.innerHTML = "⏳ Model is loading... This can take 20-30 seconds.<br>Please try again in a moment.<br><button id='closeAI' style='margin-top:8px;padding:6px 12px;background:#5865F2;border:none;border-radius:6px;color:white;cursor:pointer;'>Close</button>";
-          box.querySelector("#closeAI").onclick = () => box.remove();
+          updateBox("⏳ Model is loading... This can take 20-30 seconds.\nPlease try again in a moment.");
           return;
         }
         
@@ -151,15 +174,13 @@
         reply = "No response generated";
       }
       
-      box.innerHTML = `<div style="white-space:pre-wrap;word-wrap:break-word;">${reply || "No reply"}</div><button id='closeAI' style='margin-top:8px;padding:6px 12px;background:#5865F2;border:none;border-radius:6px;color:white;cursor:pointer;'>Close</button>`;
-      box.querySelector("#closeAI").onclick = () => box.remove();
+      updateBox(reply || "No reply");
     } catch(e) {
       let errorMsg = e.message;
       if(e.name === "AbortError") {
         errorMsg = "Request timed out. The model may be loading. Please try again.";
       }
-      box.innerHTML = `❌ AI Error:<br><span style="font-size:12px;">${errorMsg}</span><br><button id='closeAI' style='margin-top:8px;padding:6px 12px;background:#5865F2;border:none;border-radius:6px;color:white;cursor:pointer;'>Close</button>`;
-      box.querySelector("#closeAI").onclick = () => box.remove();
+      updateBox("❌ AI Error:\n" + errorMsg, true);
     }
   };
 
