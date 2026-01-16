@@ -2,8 +2,9 @@
   if(document.getElementById("ziperRoot")) return;
 
   /* ===== CONFIG ===== */
+  // Get your free token at: https://huggingface.co/settings/tokens
   const HF_TOKEN = "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"; // Hugging Face token
-  const MODEL = "HuggingFaceTB/SmolLM2-360M-Instruct"; // Replace if needed
+  const MODEL = "HuggingFaceTB/SmolLM2-360M-Instruct"; // Fast, small model
 
   /* ===== ROOT (PROTECTED) ===== */
   const root = document.createElement("div");
@@ -94,28 +95,70 @@
       transform:translate(-50%,-50%);
       background:#111;color:white;
       padding:14px;border-radius:12px;
-      z-index:99999999;width:320px;
+      z-index:99999999;width:360px;
+      max-height:400px;overflow-y:auto;
     `;
-    box.innerHTML = "Thinking…<br><button id='closeAI'>Close</button>";
+    box.innerHTML = "🤔 Thinking…<br><button id='closeAI' style='margin-top:8px;padding:6px 12px;background:#5865F2;border:none;border-radius:6px;color:white;cursor:pointer;'>Close</button>";
     document.body.appendChild(box);
     box.querySelector("#closeAI").onclick = () => box.remove();
 
     try {
+      // Try Hugging Face API with better error handling
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+      
       const res = await fetch("https://api-inference.huggingface.co/models/"+MODEL,{
         method:"POST",
         headers:{
           "Authorization":"Bearer "+HF_TOKEN,
           "Content-Type":"application/json"
         },
-        body:JSON.stringify({inputs:q, parameters:{max_new_tokens:120}})
+        body:JSON.stringify({
+          inputs:q, 
+          parameters:{max_new_tokens:150, temperature:0.7}
+        }),
+        signal: controller.signal
       });
-      if(!res.ok) throw new Error("HTTP "+res.status+" "+res.statusText);
+      clearTimeout(timeout);
+
+      if(!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        
+        // Handle model loading
+        if(res.status === 503 || errorData.error?.includes("loading")) {
+          box.innerHTML = "⏳ Model is loading... This can take 20-30 seconds.<br>Please try again in a moment.<br><button id='closeAI' style='margin-top:8px;padding:6px 12px;background:#5865F2;border:none;border-radius:6px;color:white;cursor:pointer;'>Close</button>";
+          box.querySelector("#closeAI").onclick = () => box.remove();
+          return;
+        }
+        
+        // Handle token/auth errors
+        if(res.status === 401 || res.status === 403) {
+          throw new Error("Authentication failed. Token may be invalid.");
+        }
+        
+        throw new Error(`HTTP ${res.status}: ${errorData.error || res.statusText}`);
+      }
 
       const data = await res.json();
-      box.innerHTML = (data[0]?.generated_text?.replace(q,"").trim() || "No reply") + "<br><button id='closeAI'>Close</button>";
+      
+      // Handle different response formats
+      let reply = "";
+      if(Array.isArray(data) && data[0]?.generated_text) {
+        reply = data[0].generated_text.replace(q,"").trim();
+      } else if(data.generated_text) {
+        reply = data.generated_text.replace(q,"").trim();
+      } else {
+        reply = "No response generated";
+      }
+      
+      box.innerHTML = `<div style="white-space:pre-wrap;word-wrap:break-word;">${reply || "No reply"}</div><button id='closeAI' style='margin-top:8px;padding:6px 12px;background:#5865F2;border:none;border-radius:6px;color:white;cursor:pointer;'>Close</button>`;
       box.querySelector("#closeAI").onclick = () => box.remove();
     } catch(e) {
-      box.innerHTML = "AI error: "+e.message+"<br><button id='closeAI'>Close</button>";
+      let errorMsg = e.message;
+      if(e.name === "AbortError") {
+        errorMsg = "Request timed out. The model may be loading. Please try again.";
+      }
+      box.innerHTML = `❌ AI Error:<br><span style="font-size:12px;">${errorMsg}</span><br><button id='closeAI' style='margin-top:8px;padding:6px 12px;background:#5865F2;border:none;border-radius:6px;color:white;cursor:pointer;'>Close</button>`;
       box.querySelector("#closeAI").onclick = () => box.remove();
     }
   };
