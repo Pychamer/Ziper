@@ -2,8 +2,8 @@
   if(document.getElementById("ziperRoot")) return;
 
   /* ===== CONFIG ===== */
-  const HF_TOKEN = "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"; // Replace with your Hugging Face token
-  const MODEL = "HuggingFaceTB/SmolLM2-360M-Instruct";
+  const HF_TOKEN = "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"; // Hugging Face token
+  const MODEL = "HuggingFaceTB/SmolLM2-360M-Instruct"; // Replace if needed
 
   /* ===== ROOT (PROTECTED) ===== */
   const root = document.createElement("div");
@@ -29,7 +29,6 @@
 
   root.innerHTML = `
     <b style="text-align:center">Ziper</b>
-
     <button id="rb">🌈</button>
     <button id="hf">📜</button>
     <button id="ed">✏️</button>
@@ -37,58 +36,41 @@
     <button id="vd">🎥</button>
     <button id="ai">🧠</button>
     <button id="cl">❌</button>
-
     <style>
-      #ziperRoot button{
-        width:40px;height:40px;
-        border:none;border-radius:50%;
-        background:#2b2d31;color:white;
-        cursor:pointer;font-size:18px;
-      }
-      #ziperRoot button:hover{
-        background:#5865F2;
-      }
+      #ziperRoot button{width:40px;height:40px;border:none;border-radius:50%;background:#2b2d31;color:white;cursor:pointer;font-size:18px;}
+      #ziperRoot button:hover{background:#5865F2;}
     </style>
   `;
 
   document.body.appendChild(root);
 
-  /* ===== RAINBOW (PAGE ONLY) ===== */
+  /* ===== RAINBOW ===== */
   let rbInt = null;
   document.getElementById("rb").onclick = () => {
     if(rbInt) return;
     const colors = ["red","orange","yellow","green","blue","purple"];
     let i = 0;
-    rbInt = setInterval(() => {
-      document.body.style.backgroundColor = colors[i++ % colors.length];
-    }, 1000);
+    rbInt = setInterval(()=>{document.body.style.backgroundColor = colors[i++ % colors.length];},1000);
   };
 
-  /* ===== HISTORY FLOODER ===== */
+  /* ===== HISTORY FLOOD ===== */
   document.getElementById("hf").onclick = () => {
     const n = +prompt("History flood amount:");
     if(!n) return;
     const x = location.href;
-    for(let i=1; i<=n; i++){
-      history.pushState(0,0,i===n ? x : i.toString());
-    }
+    for(let i=1;i<=n;i++) history.pushState(0,0,i===n?x:i.toString());
     alert("History flood successful!");
   };
 
-  /* ===== EDIT PAGE (PROTECTED ZIPER) ===== */
+  /* ===== EDIT PAGE (LOCK ZIPER) ===== */
   document.getElementById("ed").onclick = () => {
     const on = document.body.contentEditable !== "true";
     document.body.contentEditable = on ? "true" : "false";
     document.designMode = on ? "on" : "off";
-
-    // Protect Ziper root from edits
     root.setAttribute("contenteditable","false");
     root.style.userSelect = "none";
     root.style.pointerEvents = "auto";
-    root.querySelectorAll("*").forEach(el => {
-      el.contentEditable = "false";
-      el.style.userSelect = "none";
-    });
+    root.querySelectorAll("*").forEach(el => {el.contentEditable="false";el.style.userSelect="none";});
   };
 
   /* ===== TRANSLATE ===== */
@@ -98,9 +80,7 @@
 
   /* ===== VIDEO SPEED ===== */
   document.getElementById("vd").onclick = () => {
-    document.querySelectorAll("video").forEach(v => {
-      v.playbackRate = v.playbackRate === 1 ? 2 : 1;
-    });
+    document.querySelectorAll("video").forEach(v => {v.playbackRate = v.playbackRate===1 ? 2 : 1;});
   };
 
   /* ===== AI CALCULATOR ===== */
@@ -116,37 +96,33 @@
       padding:14px;border-radius:12px;
       z-index:99999999;width:320px;
     `;
-    box.innerHTML = "Thinking… <br><button id='zipCloseAI'>Close</button>";
+    box.innerHTML = "Thinking…<br><button id='closeAI'>Close</button>";
     document.body.appendChild(box);
+    box.querySelector("#closeAI").onclick = () => box.remove();
 
-    // Close button for AI popup
-    box.querySelector("#zipCloseAI").onclick = () => box.remove();
-
-    try{
-      const r = await fetch("https://api-inference.huggingface.co/models/" + MODEL,{
+    try {
+      const res = await fetch("https://api-inference.huggingface.co/models/"+MODEL,{
         method:"POST",
         headers:{
-          "Authorization":"Bearer " + HF_TOKEN,
+          "Authorization":"Bearer "+HF_TOKEN,
           "Content-Type":"application/json"
         },
-        body: JSON.stringify({inputs:q, parameters:{max_new_tokens:120}})
+        body:JSON.stringify({inputs:q, parameters:{max_new_tokens:120}})
       });
-      const d = await r.json();
-      box.innerHTML = (d[0]?.generated_text?.replace(q,"").trim() || "No reply") +
-                       "<br><button id='zipCloseAI'>Close</button>";
-      box.querySelector("#zipCloseAI").onclick = () => box.remove();
-    } catch {
-      box.innerHTML = "AI error.<br><button id='zipCloseAI'>Close</button>";
-      box.querySelector("#zipCloseAI").onclick = () => box.remove();
+      if(!res.ok) throw new Error("HTTP "+res.status+" "+res.statusText);
+
+      const data = await res.json();
+      box.innerHTML = (data[0]?.generated_text?.replace(q,"").trim() || "No reply") + "<br><button id='closeAI'>Close</button>";
+      box.querySelector("#closeAI").onclick = () => box.remove();
+    } catch(e) {
+      box.innerHTML = "AI error: "+e.message+"<br><button id='closeAI'>Close</button>";
+      box.querySelector("#closeAI").onclick = () => box.remove();
     }
   };
 
   /* ===== CLOSE ===== */
   document.getElementById("cl").onclick = () => {
     clearInterval(rbInt);
-    document.body.contentEditable = "false";
-    document.designMode = "off";
     root.remove();
   };
-
 })();
