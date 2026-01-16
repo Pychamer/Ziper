@@ -2,9 +2,8 @@
   if(document.getElementById("ziperRoot")) return;
 
   /* ===== CONFIG ===== */
-  // Get your free token at: https://huggingface.co/settings/tokens
-  const HF_TOKEN = "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"; // Hugging Face token
-  const MODEL = "HuggingFaceTB/SmolLM2-360M-Instruct"; // Fast, small model
+  const CR_API_KEY = "cr-3a47a6ebb9cf24e718b02c6bb3eead85e5823c9dbc37fd6e497f0c5d55"; // CodeRabbit API
+  const CR_ENDPOINT = "https://api.coderabbit.ai/v1/chat"; // CodeRabbit endpoint
 
   /* ===== ROOT (PROTECTED) ===== */
   const root = document.createElement("div");
@@ -14,42 +13,274 @@
     position:fixed;
     bottom:20px;
     right:20px;
-    background:#1e1f22;
-    color:white;
-    padding:10px;
-    border-radius:14px;
+    background:linear-gradient(135deg, #0d1b0e 0%, #1a3a1f 100%);
+    color:#e0ffe0;
+    padding:0;
+    border-radius:16px;
     z-index:9999999;
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-    box-shadow:0 0 20px rgba(0,0,0,.6);
-    font-family:sans-serif;
+    width:380px;
+    box-shadow:0 8px 32px rgba(0,255,0,.2);
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
     user-select:none;
     pointer-events:auto;
+    border:2px solid #2ecc71;
   `;
 
   root.innerHTML = `
-    <b style="text-align:center">Ziper</b>
-    <button id="rb">🌈</button>
-    <button id="hf">📜</button>
-    <button id="ed">✏️</button>
-    <button id="tr">🌐</button>
-    <button id="vd">🎥</button>
-    <button id="ai">🧠</button>
-    <button id="cl">❌</button>
     <style>
-      #ziperRoot button{width:40px;height:40px;border:none;border-radius:50%;background:#2b2d31;color:white;cursor:pointer;font-size:18px;}
-      #ziperRoot button:hover{background:#5865F2;}
+      #ziperRoot *{box-sizing:border-box;}
+      #ziperRoot .header{
+        background:linear-gradient(90deg, #27ae60 0%, #2ecc71 100%);
+        padding:12px 16px;
+        border-radius:14px 14px 0 0;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        border-bottom:2px solid #27ae60;
+      }
+      #ziperRoot .header h3{
+        margin:0;
+        font-size:18px;
+        font-weight:bold;
+        color:#fff;
+        text-shadow:0 2px 4px rgba(0,0,0,.3);
+      }
+      #ziperRoot .beta-badge{
+        background:#f39c12;
+        color:#000;
+        padding:4px 10px;
+        border-radius:12px;
+        font-size:11px;
+        font-weight:bold;
+        letter-spacing:1px;
+      }
+      #ziperRoot .tabs{
+        display:flex;
+        background:#0a150b;
+        border-bottom:1px solid #27ae60;
+      }
+      #ziperRoot .tab{
+        flex:1;
+        padding:12px;
+        text-align:center;
+        cursor:pointer;
+        color:#7fb887;
+        border:none;
+        background:transparent;
+        font-size:14px;
+        transition:all .2s;
+        border-bottom:3px solid transparent;
+      }
+      #ziperRoot .tab:hover{
+        background:rgba(46,204,113,.1);
+        color:#2ecc71;
+      }
+      #ziperRoot .tab.active{
+        color:#2ecc71;
+        border-bottom-color:#2ecc71;
+        background:rgba(46,204,113,.15);
+      }
+      #ziperRoot .content{
+        padding:16px;
+        max-height:400px;
+        overflow-y:auto;
+      }
+      #ziperRoot .content::-webkit-scrollbar{width:8px;}
+      #ziperRoot .content::-webkit-scrollbar-track{background:#0a150b;}
+      #ziperRoot .content::-webkit-scrollbar-thumb{background:#27ae60;border-radius:4px;}
+      #ziperRoot .tab-content{display:none;}
+      #ziperRoot .tab-content.active{display:block;}
+      #ziperRoot .feature-btn{
+        width:100%;
+        padding:12px;
+        margin:8px 0;
+        background:#1a3a1f;
+        border:2px solid #27ae60;
+        border-radius:8px;
+        color:#2ecc71;
+        cursor:pointer;
+        font-size:14px;
+        transition:all .2s;
+        display:flex;
+        align-items:center;
+        gap:10px;
+      }
+      #ziperRoot .feature-btn:hover{
+        background:#27ae60;
+        color:#fff;
+        transform:translateY(-2px);
+        box-shadow:0 4px 12px rgba(46,204,113,.3);
+      }
+      #ziperRoot .chat-input{
+        width:100%;
+        padding:12px;
+        background:#0a150b;
+        border:2px solid #27ae60;
+        border-radius:8px;
+        color:#e0ffe0;
+        font-size:14px;
+        margin-bottom:10px;
+      }
+      #ziperRoot .chat-input:focus{
+        outline:none;
+        border-color:#2ecc71;
+        box-shadow:0 0 8px rgba(46,204,113,.3);
+      }
+      #ziperRoot .send-btn{
+        width:100%;
+        padding:12px;
+        background:#27ae60;
+        border:none;
+        border-radius:8px;
+        color:#fff;
+        font-weight:bold;
+        cursor:pointer;
+        transition:all .2s;
+      }
+      #ziperRoot .send-btn:hover{
+        background:#2ecc71;
+        transform:translateY(-2px);
+        box-shadow:0 4px 12px rgba(46,204,113,.4);
+      }
+      #ziperRoot .chat-response{
+        background:#0a150b;
+        padding:12px;
+        border-radius:8px;
+        margin-top:12px;
+        border-left:4px solid #27ae60;
+        color:#c9e4ce;
+        line-height:1.6;
+      }
+      #ziperRoot .close-btn{
+        background:#e74c3c;
+        color:#fff;
+        border:none;
+        padding:6px 12px;
+        border-radius:6px;
+        cursor:pointer;
+        font-size:12px;
+        font-weight:bold;
+      }
+      #ziperRoot .close-btn:hover{
+        background:#c0392b;
+      }
     </style>
+    <div class="header">
+      <h3>🌲 Ziper <span class="beta-badge">BETA</span></h3>
+      <button class="close-btn" id="closeWidget">✕</button>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-tab="chat">💬 Chat</button>
+      <button class="tab" data-tab="features">🔧 Features</button>
+      <button class="tab" data-tab="settings">⚙️ Settings</button>
+    </div>
+    <div class="content">
+      <div class="tab-content active" id="chat-tab">
+        <textarea class="chat-input" id="chatInput" placeholder="Ask AI anything..." rows="3"></textarea>
+        <button class="send-btn" id="sendChat">🚀 Send Message</button>
+        <div id="chatResponse"></div>
+      </div>
+      <div class="tab-content" id="features-tab">
+        <button class="feature-btn" id="rb">🌈 Rainbow Mode</button>
+        <button class="feature-btn" id="hf">📜 History Flooder</button>
+        <button class="feature-btn" id="ed">✏️ Edit Page Mode</button>
+        <button class="feature-btn" id="tr">🌐 Translate Page</button>
+        <button class="feature-btn" id="vd">🎥 Video Speed Toggle</button>
+      </div>
+      <div class="tab-content" id="settings-tab">
+        <div style="color:#7fb887;line-height:1.8;">
+          <p><strong style="color:#2ecc71;">Version:</strong> BETA 0.8.0</p>
+          <p><strong style="color:#2ecc71;">API:</strong> CodeRabbit AI</p>
+          <p><strong style="color:#2ecc71;">Theme:</strong> Matrix Green</p>
+          <p style="margin-top:12px;font-size:12px;color:#5a8260;">More settings coming soon...</p>
+        </div>
+      </div>
+    </div>
   `;
 
   document.body.appendChild(root);
 
-  /* ===== RAINBOW ===== */
+  /* ===== TAB SWITCHING ===== */
+  const tabs = root.querySelectorAll('.tab');
+  const tabContents = root.querySelectorAll('.tab-content');
+  
+  tabs.forEach(tab => {
+    tab.onclick = () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tabContents.forEach(tc => tc.classList.remove('active'));
+      tab.classList.add('active');
+      const targetTab = tab.getAttribute('data-tab');
+      root.querySelector(`#${targetTab}-tab`).classList.add('active');
+    };
+  });
+
+  /* ===== CLOSE WIDGET ===== */
+  document.getElementById("closeWidget").onclick = () => {
+    clearInterval(rbInt);
+    root.remove();
+  };
+
+  /* ===== AI CHAT WITH CODERABBIT ===== */
+  document.getElementById("sendChat").onclick = async () => {
+    const input = document.getElementById("chatInput");
+    const responseDiv = document.getElementById("chatResponse");
+    const q = input.value.trim();
+    if(!q) return;
+
+    responseDiv.innerHTML = '<div class="chat-response">🤔 Thinking...</div>';
+
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30000);
+      
+      const res = await fetch(CR_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + CR_API_KEY,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message: q,
+          model: "gpt-4"
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(timeout);
+
+      if(!res.ok) {
+        throw new Error(`API Error: ${res.status} ${res.statusText}`);
+      }
+
+      const data = await res.json();
+      const reply = data.response || data.message || data.text || "No response";
+      
+      responseDiv.innerHTML = `<div class="chat-response">${escapeHtml(reply)}</div>`;
+    } catch(e) {
+      let errorMsg = e.message;
+      if(e.name === "AbortError") {
+        errorMsg = "Request timed out. Please try again.";
+      }
+      responseDiv.innerHTML = `<div class="chat-response" style="border-left-color:#e74c3c;">❌ Error: ${escapeHtml(errorMsg)}</div>`;
+    }
+  };
+
+  // Helper to escape HTML (prevent XSS)
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  /* ===== RAINBOW MODE ===== */
   let rbInt = null;
   document.getElementById("rb").onclick = () => {
-    if(rbInt) return;
-    const colors = ["red","orange","yellow","green","blue","purple"];
+    if(rbInt) {
+      clearInterval(rbInt);
+      rbInt = null;
+      document.body.style.backgroundColor = "";
+      return;
+    }
+    const colors = ["#ff6b6b","#feca57","#48dbfb","#1dd1a1","#5f27cd","#ff9ff3"];
     let i = 0;
     rbInt = setInterval(()=>{document.body.style.backgroundColor = colors[i++ % colors.length];},1000);
   };
@@ -60,7 +291,7 @@
     if(!n) return;
     const x = location.href;
     for(let i=1;i<=n;i++) history.pushState(0,0,i===n?x:i.toString());
-    alert("History flood successful!");
+    alert("✅ History flood successful!");
   };
 
   /* ===== EDIT PAGE (LOCK ZIPER) ===== */
@@ -82,111 +313,5 @@
   /* ===== VIDEO SPEED ===== */
   document.getElementById("vd").onclick = () => {
     document.querySelectorAll("video").forEach(v => {v.playbackRate = v.playbackRate===1 ? 2 : 1;});
-  };
-
-  /* ===== AI CALCULATOR ===== */
-  document.getElementById("ai").onclick = async () => {
-    const q = prompt("Ziper AI:");
-    if(!q) return;
-
-    // Helper to create styled close button
-    const makeCloseBtn = () => {
-      const btn = document.createElement("button");
-      btn.id = "closeAI";
-      btn.textContent = "Close";
-      btn.style = "margin-top:8px;padding:6px 12px;background:#5865F2;border:none;border-radius:6px;color:white;cursor:pointer;";
-      return btn;
-    };
-
-    // Helper to update box content safely (prevents XSS)
-    const updateBox = (content, isError = false) => {
-      while(box.firstChild) box.removeChild(box.firstChild);
-      if(typeof content === "string") {
-        const textDiv = document.createElement("div");
-        textDiv.textContent = content;
-        if(!isError) textDiv.style = "white-space:pre-wrap;word-wrap:break-word;";
-        box.appendChild(textDiv);
-      } else {
-        box.appendChild(content);
-      }
-      const closeBtn = makeCloseBtn();
-      closeBtn.onclick = () => box.remove();
-      box.appendChild(closeBtn);
-    };
-
-    const box = document.createElement("div");
-    box.style = `
-      position:fixed;top:50%;left:50%;
-      transform:translate(-50%,-50%);
-      background:#111;color:white;
-      padding:14px;border-radius:12px;
-      z-index:99999999;width:360px;
-      max-height:400px;overflow-y:auto;
-    `;
-    updateBox("🤔 Thinking…");
-    document.body.appendChild(box);
-
-    try {
-      // Try Hugging Face API with better error handling
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
-      
-      const res = await fetch("https://api-inference.huggingface.co/models/"+MODEL,{
-        method:"POST",
-        headers:{
-          "Authorization":"Bearer "+HF_TOKEN,
-          "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-          inputs:q, 
-          parameters:{max_new_tokens:150, temperature:0.7}
-        }),
-        signal: controller.signal
-      });
-      clearTimeout(timeout);
-
-      if(!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        
-        // Handle model loading
-        if(res.status === 503 || errorData.error?.includes("loading")) {
-          updateBox("⏳ Model is loading... This can take 20-30 seconds.\nPlease try again in a moment.");
-          return;
-        }
-        
-        // Handle token/auth errors
-        if(res.status === 401 || res.status === 403) {
-          throw new Error("Authentication failed. Token may be invalid.");
-        }
-        
-        throw new Error(`HTTP ${res.status}: ${errorData.error || res.statusText}`);
-      }
-
-      const data = await res.json();
-      
-      // Handle different response formats
-      let reply = "";
-      if(Array.isArray(data) && data[0]?.generated_text) {
-        reply = data[0].generated_text.replace(q,"").trim();
-      } else if(data.generated_text) {
-        reply = data.generated_text.replace(q,"").trim();
-      } else {
-        reply = "No response generated";
-      }
-      
-      updateBox(reply || "No reply");
-    } catch(e) {
-      let errorMsg = e.message;
-      if(e.name === "AbortError") {
-        errorMsg = "Request timed out. The model may be loading. Please try again.";
-      }
-      updateBox("❌ AI Error:\n" + errorMsg, true);
-    }
-  };
-
-  /* ===== CLOSE ===== */
-  document.getElementById("cl").onclick = () => {
-    clearInterval(rbInt);
-    root.remove();
   };
 })();
