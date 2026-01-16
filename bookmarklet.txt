@@ -25,7 +25,7 @@ Installation Instructions:
 
 Features:
 - ✅ AI Chat enabled with Hugging Face API
-- ✅ FlameHub game hacks integrated
+- ✅ Blooket GUI with Zip-On's working implementation
 - ✅ Always loads latest version from GitHub
 - ✅ Cache-busted with timestamp for fresh loads
 - ✅ Works in all browsers

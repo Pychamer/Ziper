@@ -14,16 +14,12 @@ A powerful client-side JavaScript bookmarklet that injects a floating control pa
 ### 🛠️ Advanced Tools
 - **🖱️ AutoClicker** - Automatic clicking at custom CPS (1-1000)
 - **🎭 Tab Disguise** - Disguises tab as Google Drive
-- **🎮 Blooket GUI** - External Blooket hacks loader
+- **🎮 Blooket GUI** - Zip-On's working Blooket hacks implementation
 - **⏱️ Timer Controller** - Advanced video speed control (0.1-16x)
 
-### 🎮 Game Hacks (FlameHub Integration)
-- **💰 Blooket: Add Coins** - Add coins to your account
-- **🎫 Blooket: Add Tokens** - Add tokens to your account
-- **🔓 Blooket: Unlock All** - Unlock all blooks
-- **🏆 Blooket: Auto Win** - Automatically win games
-- **🌊 Blooket: Flood Game** - Spam join with bots
-- **⚡ Blooket: Speed Hack** - Remove answer delays
+### 🎮 Game Hacks
+- **🎮 Blooket GUI** - Full-featured Blooket hacks GUI in Tools tab
+- More game integrations coming soon!
 
 ### 💬 AI Chat Assistant
 - **Powered by Hugging Face** - SmolLM2-360M-Instruct model
@@ -78,11 +74,10 @@ This project incorporates features from several amazing open-source projects:
   - Thank you for the collection of useful school and fun bookmarklets!
 
 ### Game Hacks
-- **Blooket GUI** - From [BlobJanitor/minesraft2-blooket-hacks](https://github.com/BlobJanitor/minesraft2-blooket-hacks)
-  - Credit to oneminesraft2 for the original Blooket cheats GUI
-- **Blooket Game Hacks** - Inspired by FlameHub bookmarklet collection
-  - Curated selection of the most useful Blooket game enhancements
-  - Coin/token management, auto-win, game flooding, and speed hacks
+- **Blooket GUI** - From [Zip-On/Zips-Blooket-Hacks-And-Cheats-GUI](https://github.com/Zip-On/Zips-Blooket-Hacks-And-Cheats-GUI)
+  - Working implementation by Zip-On
+  - Comprehensive Blooket game hacks and cheats
+  - Works in both console and bookmarklet
 
 ### Inspiration
 - **UI Design** - Inspired by [pickle69420/picklebox](https://github.com/pickle69420/picklebox)
