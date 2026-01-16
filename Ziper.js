@@ -200,6 +200,9 @@
 
   document.body.appendChild(root);
 
+  /* ===== SHARED STATE ===== */
+  let rbInt = null; // Rainbow mode interval
+
   /* ===== TAB SWITCHING ===== */
   const tabs = root.querySelectorAll('.tab');
   const tabContents = root.querySelectorAll('.tab-content');
@@ -216,7 +219,7 @@
 
   /* ===== CLOSE WIDGET ===== */
   document.getElementById("closeWidget").onclick = () => {
-    clearInterval(rbInt);
+    if(rbInt) clearInterval(rbInt);
     root.remove();
   };
 
@@ -272,7 +275,6 @@
   }
 
   /* ===== RAINBOW MODE ===== */
-  let rbInt = null;
   document.getElementById("rb").onclick = () => {
     if(rbInt) {
       clearInterval(rbInt);
