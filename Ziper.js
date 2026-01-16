@@ -503,7 +503,8 @@
   
   // Helper to check if we're on Blooket
   function isBlooket() {
-    return window.location.hostname.includes('blooket.com');
+    const hostname = window.location.hostname;
+    return hostname === 'blooket.com' || hostname.endsWith('.blooket.com');
   }
 
   // Add Coins
@@ -600,9 +601,9 @@
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({
             id: code,
-            name: `Bot_${Math.random().toString(36).substr(2, 8)}`
+            name: `Bot_${Math.random().toString(36).slice(2, 10)}`
           })
-        }).then(r => r.ok && joined++);
+        }).then(r => r.ok && joined++).catch(() => {});
       }, i * 100);
     }
     
@@ -620,11 +621,22 @@
     try {
       // Remove answer delay
       window.answerDelay = 0;
-      // Speed up animations
-      document.querySelectorAll('*').forEach(el => {
-        el.style.transitionDuration = '0s';
-        el.style.animationDuration = '0s';
-      });
+      // Speed up animations (target game containers only)
+      const gameContainers = document.querySelectorAll('#app, .game-container, [class*="game"], [class*="question"]');
+      if(gameContainers.length > 0) {
+        gameContainers.forEach(el => {
+          el.querySelectorAll('*').forEach(child => {
+            child.style.transitionDuration = '0s';
+            child.style.animationDuration = '0s';
+          });
+        });
+      } else {
+        // Fallback: apply to specific animation classes
+        document.querySelectorAll('[class*="anim"], [class*="transition"]').forEach(el => {
+          el.style.transitionDuration = '0s';
+          el.style.animationDuration = '0s';
+        });
+      }
       alert('✅ Speed hack activated! Answers submit instantly.');
     } catch(e) {
       alert('❌ Failed to activate speed hack.');
