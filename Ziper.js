@@ -3,7 +3,8 @@
 
   /* ===== CONFIG ===== */
   const CR_API_KEY = "cr-3a47a6ebb9cf24e718b02c6bb3eead85e5823c9dbc37fd6e497f0c5d55"; // CodeRabbit API
-  const CR_ENDPOINT = "https://api.coderabbit.ai/v1/chat"; // CodeRabbit endpoint
+  const CR_ENDPOINT = "https://api.coderabbit.ai/v1/chat"; // CodeRabbit endpoint (CORS blocked)
+  const AI_ENABLED = false; // Disabled due to CORS policy
 
   /* ===== ROOT (PROTECTED) ===== */
   const root = document.createElement("div");
@@ -164,6 +165,44 @@
       #ziperRoot .close-btn:hover{
         background:#c0392b;
       }
+      #ziperRoot .sub-tabs{
+        display:flex;
+        background:#0a150b;
+        border-radius:8px;
+        margin-bottom:12px;
+        padding:4px;
+        gap:4px;
+      }
+      #ziperRoot .sub-tab{
+        flex:1;
+        padding:8px;
+        text-align:center;
+        cursor:pointer;
+        color:#7fb887;
+        border:none;
+        background:transparent;
+        font-size:13px;
+        border-radius:6px;
+        transition:all .2s;
+      }
+      #ziperRoot .sub-tab:hover{
+        background:rgba(46,204,113,.1);
+        color:#2ecc71;
+      }
+      #ziperRoot .sub-tab.active{
+        color:#fff;
+        background:#27ae60;
+      }
+      #ziperRoot .sub-content{
+        max-height:280px;
+        overflow-y:auto;
+        padding-right:4px;
+      }
+      #ziperRoot .sub-content::-webkit-scrollbar{width:6px;}
+      #ziperRoot .sub-content::-webkit-scrollbar-track{background:#0a150b;border-radius:3px;}
+      #ziperRoot .sub-content::-webkit-scrollbar-thumb{background:#27ae60;border-radius:3px;}
+      #ziperRoot .sub-tab-content{display:none;}
+      #ziperRoot .sub-tab-content.active{display:block;}
     </style>
     <div class="header">
       <h3>🌲 Ziper <span class="beta-badge">BETA</span></h3>
@@ -181,18 +220,33 @@
         <div id="chatResponse"></div>
       </div>
       <div class="tab-content" id="features-tab">
-        <button class="feature-btn" id="rb">🌈 Rainbow Mode</button>
-        <button class="feature-btn" id="hf">📜 History Flooder</button>
-        <button class="feature-btn" id="ed">✏️ Edit Page Mode</button>
-        <button class="feature-btn" id="tr">🌐 Translate Page</button>
-        <button class="feature-btn" id="vd">🎥 Video Speed Toggle</button>
+        <div class="sub-tabs">
+          <button class="sub-tab active" data-subtab="basic">📌 Basic</button>
+          <button class="sub-tab" data-subtab="tools">🛠️ Tools</button>
+        </div>
+        <div class="sub-content">
+          <div class="sub-tab-content active" id="basic-subtab">
+            <button class="feature-btn" id="rb">🌈 Rainbow Mode</button>
+            <button class="feature-btn" id="hf">📜 History Flooder</button>
+            <button class="feature-btn" id="ed">✏️ Edit Page Mode</button>
+            <button class="feature-btn" id="tr">🌐 Translate Page</button>
+            <button class="feature-btn" id="vd">🎥 Video Speed Toggle</button>
+          </div>
+          <div class="sub-tab-content" id="tools-subtab">
+            <button class="feature-btn" id="ac">🖱️ AutoClicker</button>
+            <button class="feature-btn" id="td">🎭 Tab Disguise</button>
+            <button class="feature-btn" id="bg">🎮 Blooket GUI</button>
+            <button class="feature-btn" id="tc">⏱️ Timer Controller</button>
+          </div>
+        </div>
       </div>
       <div class="tab-content" id="settings-tab">
         <div style="color:#7fb887;line-height:1.8;">
-          <p><strong style="color:#2ecc71;">Version:</strong> BETA 0.8.0</p>
-          <p><strong style="color:#2ecc71;">API:</strong> CodeRabbit AI</p>
+          <p><strong style="color:#2ecc71;">Version:</strong> BETA 0.9.0</p>
+          <p><strong style="color:#2ecc71;">API:</strong> Disabled (CORS)</p>
           <p><strong style="color:#2ecc71;">Theme:</strong> Matrix Green</p>
-          <p style="margin-top:12px;font-size:12px;color:#5a8260;">More settings coming soon...</p>
+          <p style="margin-top:12px;font-size:12px;color:#f39c12;">⚠️ AI Chat disabled due to CORS policy</p>
+          <p style="margin-top:4px;font-size:12px;color:#5a8260;">More settings coming soon...</p>
         </div>
       </div>
     </div>
@@ -217,62 +271,35 @@
     };
   });
 
+  /* ===== SUB-TAB SWITCHING ===== */
+  const subTabs = root.querySelectorAll('.sub-tab');
+  const subTabContents = root.querySelectorAll('.sub-tab-content');
+  
+  subTabs.forEach(subTab => {
+    subTab.onclick = () => {
+      subTabs.forEach(st => st.classList.remove('active'));
+      subTabContents.forEach(stc => stc.classList.remove('active'));
+      subTab.classList.add('active');
+      const targetSubTab = subTab.getAttribute('data-subtab');
+      root.querySelector(`#${targetSubTab}-subtab`).classList.add('active');
+    };
+  });
+
   /* ===== CLOSE WIDGET ===== */
   document.getElementById("closeWidget").onclick = () => {
     if(rbInt) clearInterval(rbInt);
     root.remove();
   };
 
-  /* ===== AI CHAT WITH CODERABBIT ===== */
+  /* ===== AI CHAT (DISABLED - CORS ISSUE) ===== */
   document.getElementById("sendChat").onclick = async () => {
     const input = document.getElementById("chatInput");
     const responseDiv = document.getElementById("chatResponse");
     const q = input.value.trim();
     if(!q) return;
 
-    responseDiv.innerHTML = '<div class="chat-response">🤔 Thinking...</div>';
-
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 30000);
-      
-      const res = await fetch(CR_ENDPOINT, {
-        method: "POST",
-        headers: {
-          "Authorization": "Bearer " + CR_API_KEY,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          message: q,
-          model: "gpt-4"
-        }),
-        signal: controller.signal
-      });
-      clearTimeout(timeout);
-
-      if(!res.ok) {
-        throw new Error(`API Error: ${res.status} ${res.statusText}`);
-      }
-
-      const data = await res.json();
-      const reply = data.response || data.message || data.text || "No response";
-      
-      responseDiv.innerHTML = `<div class="chat-response">${escapeHtml(reply)}</div>`;
-    } catch(e) {
-      let errorMsg = e.message;
-      if(e.name === "AbortError") {
-        errorMsg = "Request timed out. Please try again.";
-      }
-      responseDiv.innerHTML = `<div class="chat-response" style="border-left-color:#e74c3c;">❌ Error: ${escapeHtml(errorMsg)}</div>`;
-    }
+    responseDiv.innerHTML = '<div class="chat-response" style="border-left-color:#f39c12;">⚠️ AI Chat is currently disabled due to CORS policy restrictions.<br><br>The CodeRabbit API cannot be accessed from client-side JavaScript. A server-side proxy would be needed to enable this feature.</div>';
   };
-
-  // Helper to escape HTML (prevent XSS)
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
 
   /* ===== RAINBOW MODE ===== */
   document.getElementById("rb").onclick = () => {
@@ -315,5 +342,86 @@
   /* ===== VIDEO SPEED ===== */
   document.getElementById("vd").onclick = () => {
     document.querySelectorAll("video").forEach(v => {v.playbackRate = v.playbackRate===1 ? 2 : 1;});
+  };
+
+  /* ===== AUTOCLICKER (from TheRealMrGamz/Bookmarklets) ===== */
+  document.getElementById("ac").onclick = () => {
+    if(!window.ziperClick){
+      window.ziperClick = true;
+      document.body.style.cursor = 'crosshair';
+      const cps = prompt('AutoClicker CPS: (Under 200 recommended)');
+      if(!cps || isNaN(cps)){
+        alert('Invalid CPS value. Try again.');
+        window.ziperClick = false;
+        document.body.style.cursor = 'default';
+        return;
+      }
+      alert(`AutoClicker activated at ${cps} CPS! Press [Ctrl+E] to stop.`);
+      
+      let x = 0, y = 0;
+      const moveHandler = e => {x = e.clientX; y = e.clientY;};
+      const keyHandler = e => {
+        if(e.key === 'e' && e.ctrlKey){
+          alert('AutoClicker deactivated!');
+          clearInterval(window.ziperClickInt);
+          document.removeEventListener('mousemove', moveHandler);
+          document.removeEventListener('keydown', keyHandler);
+          window.ziperClick = false;
+          document.body.style.cursor = 'default';
+        }
+      };
+      
+      document.addEventListener('mousemove', moveHandler);
+      document.addEventListener('keydown', keyHandler);
+      
+      window.ziperClickInt = setInterval(() => {
+        const el = document.elementFromPoint(x, y);
+        if(el) el.click();
+      }, 1000/cps);
+    }
+  };
+
+  /* ===== TAB DISGUISE (from TheRealMrGamz/Bookmarklets) ===== */
+  document.getElementById("td").onclick = () => {
+    function gcloak() {
+      let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+      link.type = 'image/x-icon';
+      link.rel = 'shortcut icon';
+      link.href = 'https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png';
+      document.title = 'My Drive - Google Drive';
+      document.getElementsByTagName('head')[0].appendChild(link);
+    }
+    gcloak();
+    setInterval(gcloak, 1000);
+    alert('✅ Tab disguised as Google Drive!');
+  };
+
+  /* ===== BLOOKET GUI (from BlobJanitor/minesraft2-blooket-hacks) ===== */
+  document.getElementById("bg").onclick = () => {
+    const script = document.createElement('script');
+    script.src = 'https://raw.githubusercontent.com/BlobJanitor/minesraft2-blooket-hacks/main/blooket%20gui%20bookmarklet';
+    document.body.appendChild(script);
+    alert('🎮 Blooket GUI loading...');
+  };
+
+  /* ===== TIMER CONTROLLER (inspired by Greasyfork script) ===== */
+  document.getElementById("tc").onclick = () => {
+    const speed = prompt('Video speed multiplier (0.1-16):', '2');
+    if(!speed || isNaN(speed)) return;
+    const speedNum = parseFloat(speed);
+    if(speedNum < 0.1 || speedNum > 16){
+      alert('Speed must be between 0.1 and 16');
+      return;
+    }
+    
+    // Speed up all videos
+    document.querySelectorAll('video').forEach(v => {
+      v.playbackRate = speedNum;
+    });
+    
+    // Skip ads and intros
+    document.querySelectorAll('.ytp-ad-skip-button, .ytp-skip-ad-button').forEach(btn => btn.click());
+    
+    alert(`⏱️ Videos set to ${speedNum}x speed!`);
   };
 })();
