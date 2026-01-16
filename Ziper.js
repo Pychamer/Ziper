@@ -405,7 +405,6 @@
 
   /* ===== BLOOKET GUI (from BlobJanitor/minesraft2-blooket-hacks) ===== */
   document.getElementById("bg").onclick = () => {
-    if(!confirm('⚠️ WARNING: This loads external code from GitHub.\n\nOnly use on Blooket game pages.\n\nContinue?')) return;
     const script = document.createElement('script');
     script.src = 'https://raw.githubusercontent.com/BlobJanitor/minesraft2-blooket-hacks/main/blooket%20gui%20bookmarklet';
     document.body.appendChild(script);
