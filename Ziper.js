@@ -470,7 +470,6 @@
     const script = document.createElement('script');
     script.src = 'https://raw.githubusercontent.com/Zip-On/Zips-Blooket-Hacks-And-Cheats-GUI/main/Gui.js';
     document.body.appendChild(script);
-    alert('🎮 Blooket GUI loading... (from Zip-On)');
   };
 
   /* ===== TIMER CONTROLLER (inspired by Greasyfork script) ===== */
