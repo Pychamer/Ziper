@@ -2,7 +2,7 @@
   if(document.getElementById("ziperRoot")) return;
 
   /* ===== CONFIG ===== */
-  const HF_TOKEN = "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"; // Replace with your Hugging Face token
+  const HF_TOKEN = "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"; // Replace with your Hugging Face token
   const MODEL = "HuggingFaceTB/SmolLM2-360M-Instruct";
 
   /* ===== ROOT (PROTECTED) ===== */
