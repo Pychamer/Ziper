@@ -223,6 +223,7 @@
         <div class="sub-tabs">
           <button class="sub-tab active" data-subtab="basic">📌 Basic</button>
           <button class="sub-tab" data-subtab="tools">🛠️ Tools</button>
+          <button class="sub-tab" data-subtab="games">🎮 Games</button>
         </div>
         <div class="sub-content">
           <div class="sub-tab-content active" id="basic-subtab">
@@ -238,16 +239,25 @@
             <button class="feature-btn" id="bg">🎮 Blooket GUI</button>
             <button class="feature-btn" id="tc">⏱️ Timer Controller</button>
           </div>
+          <div class="sub-tab-content" id="games-subtab">
+            <button class="feature-btn" id="blk-coins">💰 Blooket: Add Coins</button>
+            <button class="feature-btn" id="blk-tokens">🎫 Blooket: Add Tokens</button>
+            <button class="feature-btn" id="blk-unlock">🔓 Blooket: Unlock All</button>
+            <button class="feature-btn" id="blk-win">🏆 Blooket: Auto Win</button>
+            <button class="feature-btn" id="blk-flood">🌊 Blooket: Flood Game</button>
+            <button class="feature-btn" id="blk-speed">⚡ Blooket: Speed Hack</button>
+          </div>
         </div>
       </div>
       <div class="tab-content" id="settings-tab">
         <div style="color:#7fb887;line-height:1.8;">
-          <p><strong style="color:#2ecc71;">Version:</strong> BETA 0.9.0</p>
+          <p><strong style="color:#2ecc71;">Version:</strong> v1.0.0 RELEASE</p>
           <p><strong style="color:#2ecc71;">API:</strong> Hugging Face AI</p>
           <p><strong style="color:#2ecc71;">Model:</strong> SmolLM2-360M</p>
           <p><strong style="color:#2ecc71;">Theme:</strong> Matrix Green</p>
-          <p style="margin-top:12px;font-size:12px;color:#2ecc71;">✅ AI Chat enabled with Hugging Face</p>
-          <p style="margin-top:4px;font-size:12px;color:#5a8260;">More settings coming soon...</p>
+          <p style="margin-top:12px;font-size:12px;color:#2ecc71;">✅ AI Chat enabled</p>
+          <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ FlameHub games integrated</p>
+          <p style="margin-top:4px;font-size:12px;color:#5a8260;">More features coming soon...</p>
         </div>
       </div>
     </div>
@@ -487,5 +497,138 @@
     document.querySelectorAll('.ytp-ad-skip-button, .ytp-skip-ad-button').forEach(btn => btn.click());
     
     alert(`⏱️ Videos set to ${speedNum}x speed!`);
+  };
+
+  /* ===== BLOOKET GAME HACKS (from FlameHub) ===== */
+  
+  // Helper to check if we're on Blooket
+  function isBlooket() {
+    return window.location.hostname.includes('blooket.com');
+  }
+
+  // Add Coins
+  document.getElementById("blk-coins").onclick = () => {
+    if(!isBlooket()) {
+      alert('⚠️ This feature only works on Blooket.com');
+      return;
+    }
+    const amount = prompt('How many coins to add?', '1000');
+    if(!amount || isNaN(amount)) return;
+    try {
+      const coins = parseInt(amount);
+      // Access React state
+      const state = Object.values(document.querySelector('#app > div > div'))[1].children[0]._owner.stateNode;
+      state.setState({coins: state.state.coins + coins});
+      alert(`✅ Added ${coins} coins!`);
+    } catch(e) {
+      alert('❌ Failed to add coins. Make sure you\'re in a game!');
+      console.error(e);
+    }
+  };
+
+  // Add Tokens
+  document.getElementById("blk-tokens").onclick = () => {
+    if(!isBlooket()) {
+      alert('⚠️ This feature only works on Blooket.com');
+      return;
+    }
+    const amount = prompt('How many tokens to add?', '500');
+    if(!amount || isNaN(amount)) return;
+    try {
+      const tokens = parseInt(amount);
+      const state = Object.values(document.querySelector('#app > div > div'))[1].children[0]._owner.stateNode;
+      state.setState({tokens: state.state.tokens + tokens});
+      alert(`✅ Added ${tokens} tokens!`);
+    } catch(e) {
+      alert('❌ Failed to add tokens. Make sure you\'re in a game!');
+      console.error(e);
+    }
+  };
+
+  // Unlock All Blooks
+  document.getElementById("blk-unlock").onclick = () => {
+    if(!isBlooket()) {
+      alert('⚠️ This feature only works on Blooket.com');
+      return;
+    }
+    try {
+      fetch('https://api.blooket.com/api/users/unlockblook', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({name: 'All'})
+      });
+      alert('✅ Unlock request sent! Check your account.');
+    } catch(e) {
+      alert('❌ Failed to unlock. Try again later.');
+      console.error(e);
+    }
+  };
+
+  // Auto Win
+  document.getElementById("blk-win").onclick = () => {
+    if(!isBlooket()) {
+      alert('⚠️ This feature only works on Blooket.com');
+      return;
+    }
+    try {
+      const state = Object.values(document.querySelector('#app > div > div'))[1].children[0]._owner.stateNode;
+      state.setState({isGameOver: true, winner: true});
+      alert('✅ Game won! (May not work in all game modes)');
+    } catch(e) {
+      alert('❌ Failed to win game. Make sure you\'re in an active game!');
+      console.error(e);
+    }
+  };
+
+  // Flood Game (Spam Join)
+  document.getElementById("blk-flood").onclick = () => {
+    if(!isBlooket()) {
+      alert('⚠️ This feature only works on Blooket.com');
+      return;
+    }
+    const code = prompt('Enter game code to flood:');
+    if(!code) return;
+    const count = prompt('How many bots? (1-50):', '10');
+    if(!count || isNaN(count)) return;
+    const botCount = Math.min(parseInt(count), 50);
+    
+    let joined = 0;
+    for(let i = 1; i <= botCount; i++) {
+      setTimeout(() => {
+        fetch('https://api.blooket.com/api/firebase/join', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            id: code,
+            name: `Bot_${Math.random().toString(36).substr(2, 8)}`
+          })
+        }).then(r => r.ok && joined++);
+      }, i * 100);
+    }
+    
+    setTimeout(() => {
+      alert(`✅ Flood complete! ${joined}/${botCount} bots joined.`);
+    }, (botCount * 100) + 500);
+  };
+
+  // Speed Hack
+  document.getElementById("blk-speed").onclick = () => {
+    if(!isBlooket()) {
+      alert('⚠️ This feature only works on Blooket.com');
+      return;
+    }
+    try {
+      // Remove answer delay
+      window.answerDelay = 0;
+      // Speed up animations
+      document.querySelectorAll('*').forEach(el => {
+        el.style.transitionDuration = '0s';
+        el.style.animationDuration = '0s';
+      });
+      alert('✅ Speed hack activated! Answers submit instantly.');
+    } catch(e) {
+      alert('❌ Failed to activate speed hack.');
+      console.error(e);
+    }
   };
 })();

@@ -1,26 +1,34 @@
-ZIPER BOOKMARKLET - Updated with Hugging Face AI
+ZIPER BOOKMARKLET - v1.0.0 with FlameHub Integration
 ================================================================
 
-⚠️ IMPORTANT: Due to code size, please use the GitHub loader method below!
+⚠️ IMPORTANT: Use the GitHub loader method below!
 
-RECOMMENDED: Load from GitHub
-==============================
-This loads the latest Ziper.js with AI enabled:
+🚀 RECOMMENDED: Load from GitHub (PR Branch)
+==============================================
+This loads the LATEST Ziper.js from this PR with all new features:
 
-javascript:(function(){const s=document.createElement('script');s.src='https://raw.githubusercontent.com/Pychamer/Ziper/main/Ziper.js';document.body.appendChild(s);})();
+javascript:(function(){const s=document.createElement('script');s.src='https://raw.githubusercontent.com/Pychamer/Ziper/copilot/understand-ziper-capabilities/Ziper.js?'+Date.now();document.body.appendChild(s);})();
 
 COPY THE LINE ABOVE (starting with javascript:) and save as a bookmark!
+
+📦 After PR is merged, use this for stable main branch:
+
+javascript:(function(){const s=document.createElement('script');s.src='https://raw.githubusercontent.com/Pychamer/Ziper/main/Ziper.js?'+Date.now();document.body.appendChild(s);})();
 
 ---
 
 Installation Instructions:
 1. Create a new bookmark in your browser
-2. Copy the javascript code above
+2. Copy the javascript code above (PR branch version)
 3. Paste it as the URL/Location of the bookmark  
 4. Click the bookmark on any webpage to load Ziper
 
 Features:
-- ✅ AI Chat now enabled with Hugging Face
+- ✅ AI Chat enabled with Hugging Face API
+- ✅ FlameHub game hacks integrated
 - ✅ Always loads latest version from GitHub
+- ✅ Cache-busted with timestamp for fresh loads
 - ✅ Works in all browsers
 - ✅ No URL length limitations
+
+Note: After the PR is merged to main, switch to the main branch bookmarklet for stability.
