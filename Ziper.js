@@ -100,7 +100,7 @@
 
     // Helper to update box content safely (prevents XSS)
     const updateBox = (content, isError = false) => {
-      box.innerHTML = "";
+      while(box.firstChild) box.removeChild(box.firstChild);
       if(typeof content === "string") {
         const textDiv = document.createElement("div");
         textDiv.textContent = content;
