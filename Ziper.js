@@ -349,14 +349,21 @@
     if(!window.ziperClick){
       window.ziperClick = true;
       document.body.style.cursor = 'crosshair';
-      const cps = prompt('AutoClicker CPS: (Under 200 recommended)');
+      const cps = prompt('AutoClicker CPS: (1-200 recommended)');
       if(!cps || isNaN(cps)){
         alert('Invalid CPS value. Try again.');
         window.ziperClick = false;
         document.body.style.cursor = 'default';
         return;
       }
-      alert(`AutoClicker activated at ${cps} CPS! Press [Ctrl+E] to stop.`);
+      const cpsNum = parseFloat(cps);
+      if(cpsNum < 1 || cpsNum > 1000){
+        alert('CPS must be between 1 and 1000 for safety.');
+        window.ziperClick = false;
+        document.body.style.cursor = 'default';
+        return;
+      }
+      alert(`AutoClicker activated at ${cpsNum} CPS! Press [Ctrl+E] to stop.`);
       
       let x = 0, y = 0;
       const moveHandler = e => {x = e.clientX; y = e.clientY;};
@@ -377,7 +384,7 @@
       window.ziperClickInt = setInterval(() => {
         const el = document.elementFromPoint(x, y);
         if(el) el.click();
-      }, 1000/cps);
+      }, 1000/cpsNum);
     }
   };
 
@@ -398,6 +405,7 @@
 
   /* ===== BLOOKET GUI (from BlobJanitor/minesraft2-blooket-hacks) ===== */
   document.getElementById("bg").onclick = () => {
+    if(!confirm('⚠️ WARNING: This loads external code from GitHub.\n\nOnly use on Blooket game pages.\n\nContinue?')) return;
     const script = document.createElement('script');
     script.src = 'https://raw.githubusercontent.com/BlobJanitor/minesraft2-blooket-hacks/main/blooket%20gui%20bookmarklet';
     document.body.appendChild(script);
