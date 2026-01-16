@@ -2,9 +2,9 @@
   if(document.getElementById("ziperRoot")) return;
 
   /* ===== CONFIG ===== */
-  const CR_API_KEY = "cr-3a47a6ebb9cf24e718b02c6bb3eead85e5823c9dbc37fd6e497f0c5d55"; // CodeRabbit API
-  const CR_ENDPOINT = "https://api.coderabbit.ai/v1/chat"; // CodeRabbit endpoint (CORS blocked)
-  const AI_ENABLED = false; // Disabled due to CORS policy
+  const HF_TOKEN = "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"; // Hugging Face API token
+  const HF_MODEL = "HuggingFaceTB/SmolLM2-360M-Instruct"; // AI Model
+  const AI_ENABLED = true; // Re-enabled with Hugging Face
 
   /* ===== ROOT (PROTECTED) ===== */
   const root = document.createElement("div");
@@ -243,9 +243,10 @@
       <div class="tab-content" id="settings-tab">
         <div style="color:#7fb887;line-height:1.8;">
           <p><strong style="color:#2ecc71;">Version:</strong> BETA 0.9.0</p>
-          <p><strong style="color:#2ecc71;">API:</strong> Disabled (CORS)</p>
+          <p><strong style="color:#2ecc71;">API:</strong> Hugging Face AI</p>
+          <p><strong style="color:#2ecc71;">Model:</strong> SmolLM2-360M</p>
           <p><strong style="color:#2ecc71;">Theme:</strong> Matrix Green</p>
-          <p style="margin-top:12px;font-size:12px;color:#f39c12;">⚠️ AI Chat disabled due to CORS policy</p>
+          <p style="margin-top:12px;font-size:12px;color:#2ecc71;">✅ AI Chat enabled with Hugging Face</p>
           <p style="margin-top:4px;font-size:12px;color:#5a8260;">More settings coming soon...</p>
         </div>
       </div>
@@ -291,15 +292,71 @@
     root.remove();
   };
 
-  /* ===== AI CHAT (DISABLED - CORS ISSUE) ===== */
+  /* ===== AI CHAT WITH HUGGING FACE ===== */
   document.getElementById("sendChat").onclick = async () => {
     const input = document.getElementById("chatInput");
     const responseDiv = document.getElementById("chatResponse");
     const q = input.value.trim();
     if(!q) return;
 
-    responseDiv.innerHTML = '<div class="chat-response" style="border-left-color:#f39c12;">⚠️ AI Chat is currently disabled due to CORS policy restrictions.<br><br>The CodeRabbit API cannot be accessed from client-side JavaScript. A server-side proxy would be needed to enable this feature.</div>';
+    responseDiv.innerHTML = '<div class="chat-response">🤔 Thinking...</div>';
+
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30000);
+      
+      const res = await fetch(`https://api-inference.huggingface.co/models/${HF_MODEL}`, {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + HF_TOKEN,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          inputs: q,
+          parameters: {max_new_tokens: 150, temperature: 0.7}
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(timeout);
+
+      if(!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        if(res.status === 503 || errorData.error?.includes("loading")) {
+          responseDiv.innerHTML = '<div class="chat-response" style="border-left-color:#f39c12;">⏳ Model is loading... This can take 20-30 seconds.<br><br>Please try again in a moment.</div>';
+          return;
+        }
+        if(res.status === 401 || res.status === 403) {
+          throw new Error("Authentication failed. Token may be invalid.");
+        }
+        throw new Error(`HTTP ${res.status}: ${errorData.error || res.statusText}`);
+      }
+
+      const data = await res.json();
+      let reply = "";
+      if(Array.isArray(data) && data[0]?.generated_text) {
+        reply = data[0].generated_text.replace(q,"").trim();
+      } else if(data.generated_text) {
+        reply = data.generated_text.replace(q,"").trim();
+      } else {
+        reply = "No response generated";
+      }
+      
+      responseDiv.innerHTML = '<div class="chat-response">' + escapeHtml(reply || "No reply") + '</div>';
+    } catch(e) {
+      let errorMsg = e.message;
+      if(e.name === "AbortError") {
+        errorMsg = "Request timed out. The model may be loading. Please try again.";
+      }
+      responseDiv.innerHTML = '<div class="chat-response" style="border-left-color:#e74c3c;">❌ AI Error:<br>' + escapeHtml(errorMsg) + '</div>';
+    }
   };
+
+  // Helper to escape HTML (prevent XSS)
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
 
   /* ===== RAINBOW MODE ===== */
   document.getElementById("rb").onclick = () => {
