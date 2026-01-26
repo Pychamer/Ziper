@@ -311,12 +311,6 @@
         </div>
       </div>
       <div class="tab-content" id="custom-tab">
-        <div class="warning-box">
-          ⚠️ <strong>SECURITY WARNING:</strong> Only run JavaScript code you trust!<br>
-          • Malicious code can steal data or compromise your session<br>
-          • Code runs with full page access (eval is used by design)<br>
-          • Never paste code from untrusted sources
-        </div>
         <textarea class="custom-textarea" id="customJS" placeholder="// Enter your custom JavaScript code here&#10;// Example:&#10;alert('Hello from Ziper!');&#10;&#10;// Change background color&#10;document.body.style.backgroundColor = '#ff0000';&#10;&#10;// Add custom animations&#10;// document.body.style.transition = 'all 2s';"></textarea>
         <button class="run-btn" id="runCustomJS">▶️ Run Custom Code</button>
         <div id="customResponse"></div>
