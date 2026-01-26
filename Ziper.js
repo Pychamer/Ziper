@@ -2,6 +2,7 @@
   if(document.getElementById("ziperRoot")) return;
 
   /* ===== CONFIG ===== */
+  const VERSION = "v1.1.0"; // Updated version
   const HF_TOKEN = "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"; // Hugging Face API token
   const HF_MODEL = "HuggingFaceTB/SmolLM2-360M-Instruct"; // AI Model
   const AI_ENABLED = true; // Re-enabled with Hugging Face
@@ -203,6 +204,51 @@
       #ziperRoot .sub-content::-webkit-scrollbar-thumb{background:#27ae60;border-radius:3px;}
       #ziperRoot .sub-tab-content{display:none;}
       #ziperRoot .sub-tab-content.active{display:block;}
+      #ziperRoot .custom-textarea{
+        width:100%;
+        height:200px;
+        padding:12px;
+        background:#0a150b;
+        border:2px solid #27ae60;
+        border-radius:8px;
+        color:#2ecc71;
+        font-family:monospace;
+        font-size:13px;
+        resize:vertical;
+        margin-bottom:10px;
+      }
+      #ziperRoot .custom-textarea:focus{
+        outline:none;
+        border-color:#2ecc71;
+        box-shadow:0 0 8px rgba(46,204,113,.3);
+      }
+      #ziperRoot .warning-box{
+        background:rgba(243,156,18,.1);
+        border:2px solid #f39c12;
+        border-radius:8px;
+        padding:10px;
+        margin-bottom:12px;
+        color:#f39c12;
+        font-size:12px;
+        line-height:1.5;
+      }
+      #ziperRoot .run-btn{
+        width:100%;
+        padding:12px;
+        background:#27ae60;
+        border:none;
+        border-radius:8px;
+        color:#fff;
+        font-weight:bold;
+        cursor:pointer;
+        transition:all .2s;
+        font-size:14px;
+      }
+      #ziperRoot .run-btn:hover{
+        background:#2ecc71;
+        transform:translateY(-2px);
+        box-shadow:0 4px 12px rgba(46,204,113,.4);
+      }
     </style>
     <div class="header">
       <h3>🌲 Ziper <span class="beta-badge">BETA</span></h3>
@@ -211,6 +257,7 @@
     <div class="tabs">
       <button class="tab active" data-tab="chat">💬 Chat</button>
       <button class="tab" data-tab="features">🔧 Features</button>
+      <button class="tab" data-tab="custom">⚡ Custom</button>
       <button class="tab" data-tab="settings">⚙️ Settings</button>
     </div>
     <div class="content">
@@ -223,6 +270,8 @@
         <div class="sub-tabs">
           <button class="sub-tab active" data-subtab="basic">📌 Basic</button>
           <button class="sub-tab" data-subtab="tools">🛠️ Tools</button>
+          <button class="sub-tab" data-subtab="fun">🎉 Fun</button>
+          <button class="sub-tab" data-subtab="screen">🖥️ Screen</button>
           <button class="sub-tab" data-subtab="games">🎮 Games</button>
         </div>
         <div class="sub-content">
@@ -239,20 +288,46 @@
             <button class="feature-btn" id="bg">🎮 Blooket GUI</button>
             <button class="feature-btn" id="tc">⏱️ Timer Controller</button>
           </div>
+          <div class="sub-tab-content" id="fun-subtab">
+            <button class="feature-btn" id="spin">🌀 Spin Spin</button>
+            <button class="feature-btn" id="minecraft">🧱 Minecraft Mode</button>
+            <button class="feature-btn" id="moveanything">🖐️ Move Anything</button>
+          </div>
+          <div class="sub-tab-content" id="screen-subtab">
+            <button class="feature-btn" id="blur">💫 Blur Screen</button>
+            <button class="feature-btn" id="grayscale">⚫ Grayscale</button>
+            <button class="feature-btn" id="sepia">🟤 Sepia Tone</button>
+            <button class="feature-btn" id="huerotate">🌈 Hue Rotate</button>
+            <button class="feature-btn" id="brightness">☀️ Brightness</button>
+            <button class="feature-btn" id="contrast">🔆 High Contrast</button>
+          </div>
           <div class="sub-tab-content" id="games-subtab">
-            <p style="color:#7fb887;padding:20px;text-align:center;">More game features coming soon!<br><br>For now, use the Blooket GUI in Tools tab.</p>
+            <button class="feature-btn" id="breakout">🧱 Breakout</button>
+            <button class="feature-btn" id="snake">🐍 Snake Game</button>
+            <button class="feature-btn" id="pong">🏓 Pong</button>
+            <button class="feature-btn" id="tetris">🟦 Tetris</button>
+            <button class="feature-btn" id="spaceshooter">🚀 Space Shooter</button>
           </div>
         </div>
       </div>
+      <div class="tab-content" id="custom-tab">
+        <div class="warning-box">
+          ⚠️ <strong>WARNING:</strong> Only run JavaScript code you trust. Malicious code can harm your device or steal data.
+        </div>
+        <textarea class="custom-textarea" id="customJS" placeholder="// Enter your custom JavaScript code here&#10;// Example:&#10;alert('Hello from Ziper!');&#10;&#10;// Change background color&#10;document.body.style.backgroundColor = '#ff0000';&#10;&#10;// Add custom animations&#10;// document.body.style.transition = 'all 2s';"></textarea>
+        <button class="run-btn" id="runCustomJS">▶️ Run Custom Code</button>
+        <div id="customResponse"></div>
+      </div>
       <div class="tab-content" id="settings-tab">
         <div style="color:#7fb887;line-height:1.8;">
-          <p><strong style="color:#2ecc71;">Version:</strong> v1.0.0 RELEASE</p>
+          <p><strong style="color:#2ecc71;">Version:</strong> v1.1.0 RELEASE</p>
           <p><strong style="color:#2ecc71;">API:</strong> Hugging Face AI</p>
           <p><strong style="color:#2ecc71;">Model:</strong> SmolLM2-360M</p>
           <p><strong style="color:#2ecc71;">Theme:</strong> Matrix Green</p>
           <p style="margin-top:12px;font-size:12px;color:#2ecc71;">✅ AI Chat enabled</p>
-          <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ External tool loaders</p>
-          <p style="margin-top:4px;font-size:12px;color:#5a8260;">More features coming soon...</p>
+          <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Custom JS runner</p>
+          <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Fun effects & games</p>
+          <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Screen filters</p>
         </div>
       </div>
     </div>
@@ -364,7 +439,7 @@
   }
 
   /* ===== RAINBOW MODE ===== */
-  document.getElementById("rb").onclick = () => {
+  root.querySelector("#rb").onclick = () => {
     if(rbInt) {
       clearInterval(rbInt);
       rbInt = null;
@@ -407,7 +482,7 @@
   };
 
   /* ===== AUTOCLICKER (from TheRealMrGamz/Bookmarklets) ===== */
-  document.getElementById("ac").onclick = () => {
+  root.querySelector("#ac").onclick = () => {
     if(!window.ziperClick){
       window.ziperClick = true;
       document.body.style.cursor = 'crosshair';
@@ -491,6 +566,673 @@
     document.querySelectorAll('.ytp-ad-skip-button, .ytp-skip-ad-button').forEach(btn => btn.click());
     
     alert(`⏱️ Videos set to ${speedNum}x speed!`);
+  };
+
+  /* ===== FUN FEATURES ===== */
+  
+  /* SPIN SPIN - Page rotation effect */
+  root.querySelector("#spin").onclick = () => {
+    if(window.ziperSpinInterval) {
+      clearInterval(window.ziperSpinInterval);
+      window.ziperSpinInterval = null;
+      document.body.style.transform = '';
+      return;
+    }
+    let deg = 0;
+    window.ziperSpinInterval = setInterval(() => {
+      deg = (deg + 2) % 360;
+      document.body.style.transform = `rotate(${deg}deg)`;
+    }, 20);
+  };
+
+  /* MINECRAFT MODE - Pixelated transformation */
+  root.querySelector("#minecraft").onclick = () => {
+    if(document.body.style.imageRendering === 'pixelated') {
+      document.body.style.imageRendering = '';
+      document.body.style.filter = '';
+      document.querySelectorAll('*').forEach(el => {
+        el.style.imageRendering = '';
+      });
+      return;
+    }
+    document.body.style.imageRendering = 'pixelated';
+    document.body.style.filter = 'contrast(1.2)';
+    document.querySelectorAll('img, video, canvas').forEach(el => {
+      el.style.imageRendering = 'pixelated';
+    });
+    alert('🧱 Minecraft mode activated!');
+  };
+
+  /* MOVE ANYTHING - Drag elements around */
+  root.querySelector("#moveanything").onclick = () => {
+    if(window.ziperMoveMode) {
+      window.ziperMoveMode = false;
+      document.body.style.cursor = 'default';
+      alert('Move Anything mode deactivated!');
+      return;
+    }
+    window.ziperMoveMode = true;
+    document.body.style.cursor = 'move';
+    alert('🖐️ Move Anything activated! Click and drag any element. Click again to disable.');
+    
+    let draggedEl = null;
+    let offsetX = 0, offsetY = 0;
+    
+    const mouseDownHandler = (e) => {
+      if(!window.ziperMoveMode) return;
+      if(e.target.closest('#ziperRoot')) return;
+      draggedEl = e.target;
+      const rect = draggedEl.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+      draggedEl.style.position = 'fixed';
+      draggedEl.style.zIndex = '999999';
+      e.preventDefault();
+    };
+    
+    const mouseMoveHandler = (e) => {
+      if(!draggedEl || !window.ziperMoveMode) return;
+      draggedEl.style.left = (e.clientX - offsetX) + 'px';
+      draggedEl.style.top = (e.clientY - offsetY) + 'px';
+    };
+    
+    const mouseUpHandler = () => {
+      draggedEl = null;
+    };
+    
+    document.addEventListener('mousedown', mouseDownHandler);
+    document.addEventListener('mousemove', mouseMoveHandler);
+    document.addEventListener('mouseup', mouseUpHandler);
+  };
+
+  /* ===== SCREEN EFFECTS ===== */
+  
+  /* Blur Screen */
+  root.querySelector("#blur").onclick = () => {
+    if(document.body.style.filter.includes('blur')) {
+      document.body.style.filter = '';
+    } else {
+      document.body.style.filter = 'blur(5px)';
+    }
+  };
+
+  /* Grayscale */
+  root.querySelector("#grayscale").onclick = () => {
+    if(document.body.style.filter.includes('grayscale')) {
+      document.body.style.filter = '';
+    } else {
+      document.body.style.filter = 'grayscale(100%)';
+    }
+  };
+
+  /* Sepia */
+  root.querySelector("#sepia").onclick = () => {
+    if(document.body.style.filter.includes('sepia')) {
+      document.body.style.filter = '';
+    } else {
+      document.body.style.filter = 'sepia(100%)';
+    }
+  };
+
+  /* Hue Rotate */
+  root.querySelector("#huerotate").onclick = () => {
+    if(window.ziperHueInterval) {
+      clearInterval(window.ziperHueInterval);
+      window.ziperHueInterval = null;
+      document.body.style.filter = '';
+      return;
+    }
+    let hue = 0;
+    window.ziperHueInterval = setInterval(() => {
+      hue = (hue + 5) % 360;
+      document.body.style.filter = `hue-rotate(${hue}deg)`;
+    }, 50);
+  };
+
+  /* Brightness */
+  root.querySelector("#brightness").onclick = () => {
+    if(document.body.style.filter.includes('brightness')) {
+      document.body.style.filter = '';
+    } else {
+      document.body.style.filter = 'brightness(150%)';
+    }
+  };
+
+  /* Contrast */
+  root.querySelector("#contrast").onclick = () => {
+    if(document.body.style.filter.includes('contrast')) {
+      document.body.style.filter = '';
+    } else {
+      document.body.style.filter = 'contrast(200%)';
+    }
+  };
+
+  /* ===== GAMES ===== */
+  
+  /* BREAKOUT GAME */
+  root.querySelector("#breakout").onclick = () => {
+    if(document.getElementById('ziperBreakout')) {
+      document.getElementById('ziperBreakout').remove();
+      return;
+    }
+    
+    const gameDiv = document.createElement('div');
+    gameDiv.id = 'ziperBreakout';
+    gameDiv.style = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999998;background:#000;padding:20px;border-radius:10px;border:3px solid #2ecc71;';
+    gameDiv.innerHTML = '<canvas id="breakoutCanvas" width="400" height="500"></canvas><div style="text-align:center;color:#2ecc71;margin-top:10px;">Arrow Keys to Move | ESC to Close</div>';
+    document.body.appendChild(gameDiv);
+    
+    const canvas = document.getElementById('breakoutCanvas');
+    const ctx = canvas.getContext('2d');
+    let x = canvas.width / 2, y = canvas.height - 30, dx = 2, dy = -2;
+    const ballRadius = 8, paddleHeight = 10, paddleWidth = 75;
+    let paddleX = (canvas.width - paddleWidth) / 2;
+    let rightPressed = false, leftPressed = false;
+    const brickRowCount = 5, brickColumnCount = 7;
+    const brickWidth = 50, brickHeight = 20, brickPadding = 5, brickOffsetTop = 30, brickOffsetLeft = 17.5;
+    let bricks = [];
+    let score = 0;
+    
+    for(let c = 0; c < brickColumnCount; c++) {
+      bricks[c] = [];
+      for(let r = 0; r < brickRowCount; r++) {
+        bricks[c][r] = { x: 0, y: 0, status: 1 };
+      }
+    }
+    
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Right' || e.key === 'ArrowRight') rightPressed = true;
+      else if(e.key === 'Left' || e.key === 'ArrowLeft') leftPressed = true;
+      else if(e.key === 'Escape') gameDiv.remove();
+    });
+    
+    document.addEventListener('keyup', (e) => {
+      if(e.key === 'Right' || e.key === 'ArrowRight') rightPressed = false;
+      else if(e.key === 'Left' || e.key === 'ArrowLeft') leftPressed = false;
+    });
+    
+    function drawBall() {
+      ctx.beginPath();
+      ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+      ctx.fillStyle = '#2ecc71';
+      ctx.fill();
+      ctx.closePath();
+    }
+    
+    function drawPaddle() {
+      ctx.beginPath();
+      ctx.rect(paddleX, canvas.height - paddleHeight - 10, paddleWidth, paddleHeight);
+      ctx.fillStyle = '#2ecc71';
+      ctx.fill();
+      ctx.closePath();
+    }
+    
+    function drawBricks() {
+      for(let c = 0; c < brickColumnCount; c++) {
+        for(let r = 0; r < brickRowCount; r++) {
+          if(bricks[c][r].status === 1) {
+            const brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
+            const brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
+            bricks[c][r].x = brickX;
+            bricks[c][r].y = brickY;
+            ctx.beginPath();
+            ctx.rect(brickX, brickY, brickWidth, brickHeight);
+            ctx.fillStyle = '#27ae60';
+            ctx.fill();
+            ctx.closePath();
+          }
+        }
+      }
+    }
+    
+    function collisionDetection() {
+      for(let c = 0; c < brickColumnCount; c++) {
+        for(let r = 0; r < brickRowCount; r++) {
+          const b = bricks[c][r];
+          if(b.status === 1) {
+            if(x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+              dy = -dy;
+              b.status = 0;
+              score++;
+              if(score === brickRowCount * brickColumnCount) {
+                alert('🎉 YOU WIN!');
+                gameDiv.remove();
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawBricks();
+      drawBall();
+      drawPaddle();
+      collisionDetection();
+      
+      if(x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
+      if(y + dy < ballRadius) dy = -dy;
+      else if(y + dy > canvas.height - ballRadius) {
+        if(x > paddleX && x < paddleX + paddleWidth) dy = -dy;
+        else {
+          alert('GAME OVER! Score: ' + score);
+          gameDiv.remove();
+          return;
+        }
+      }
+      
+      if(rightPressed && paddleX < canvas.width - paddleWidth) paddleX += 5;
+      else if(leftPressed && paddleX > 0) paddleX -= 5;
+      
+      x += dx;
+      y += dy;
+      requestAnimationFrame(draw);
+    }
+    draw();
+  };
+
+  /* SNAKE GAME */
+  root.querySelector("#snake").onclick = () => {
+    if(document.getElementById('ziperSnake')) {
+      document.getElementById('ziperSnake').remove();
+      return;
+    }
+    
+    const gameDiv = document.createElement('div');
+    gameDiv.id = 'ziperSnake';
+    gameDiv.style = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999998;background:#000;padding:20px;border-radius:10px;border:3px solid #2ecc71;';
+    gameDiv.innerHTML = '<canvas id="snakeCanvas" width="400" height="400"></canvas><div style="text-align:center;color:#2ecc71;margin-top:10px;">Arrow Keys | ESC to Close</div>';
+    document.body.appendChild(gameDiv);
+    
+    const canvas = document.getElementById('snakeCanvas');
+    const ctx = canvas.getContext('2d');
+    const box = 20;
+    let snake = [{x: 10 * box, y: 10 * box}];
+    let food = {x: Math.floor(Math.random() * 19 + 1) * box, y: Math.floor(Math.random() * 19 + 1) * box};
+    let score = 0;
+    let d = 'RIGHT';
+    
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'ArrowLeft' && d !== 'RIGHT') d = 'LEFT';
+      else if(e.key === 'ArrowUp' && d !== 'DOWN') d = 'UP';
+      else if(e.key === 'ArrowRight' && d !== 'LEFT') d = 'RIGHT';
+      else if(e.key === 'ArrowDown' && d !== 'UP') d = 'DOWN';
+      else if(e.key === 'Escape') gameDiv.remove();
+    });
+    
+    function draw() {
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      for(let i = 0; i < snake.length; i++) {
+        ctx.fillStyle = i === 0 ? '#2ecc71' : '#27ae60';
+        ctx.fillRect(snake[i].x, snake[i].y, box, box);
+        ctx.strokeStyle = '#0a150b';
+        ctx.strokeRect(snake[i].x, snake[i].y, box, box);
+      }
+      
+      ctx.fillStyle = '#e74c3c';
+      ctx.fillRect(food.x, food.y, box, box);
+      
+      let snakeX = snake[0].x;
+      let snakeY = snake[0].y;
+      
+      if(d === 'LEFT') snakeX -= box;
+      if(d === 'UP') snakeY -= box;
+      if(d === 'RIGHT') snakeX += box;
+      if(d === 'DOWN') snakeY += box;
+      
+      if(snakeX === food.x && snakeY === food.y) {
+        score++;
+        food = {x: Math.floor(Math.random() * 19 + 1) * box, y: Math.floor(Math.random() * 19 + 1) * box};
+      } else {
+        snake.pop();
+      }
+      
+      const newHead = {x: snakeX, y: snakeY};
+      
+      if(snakeX < 0 || snakeY < 0 || snakeX >= canvas.width || snakeY >= canvas.height || snake.some(seg => seg.x === snakeX && seg.y === snakeY)) {
+        alert('Game Over! Score: ' + score);
+        gameDiv.remove();
+        return;
+      }
+      
+      snake.unshift(newHead);
+      
+      ctx.fillStyle = '#2ecc71';
+      ctx.font = '20px Arial';
+      ctx.fillText('Score: ' + score, 10, 30);
+    }
+    
+    const game = setInterval(() => {
+      if(!document.getElementById('ziperSnake')) clearInterval(game);
+      else draw();
+    }, 100);
+  };
+
+  /* PONG GAME */
+  root.querySelector("#pong").onclick = () => {
+    if(document.getElementById('ziperPong')) {
+      document.getElementById('ziperPong').remove();
+      return;
+    }
+    
+    const gameDiv = document.createElement('div');
+    gameDiv.id = 'ziperPong';
+    gameDiv.style = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999998;background:#000;padding:20px;border-radius:10px;border:3px solid #2ecc71;';
+    gameDiv.innerHTML = '<canvas id="pongCanvas" width="600" height="400"></canvas><div style="text-align:center;color:#2ecc71;margin-top:10px;">W/S Keys | ESC to Close</div>';
+    document.body.appendChild(gameDiv);
+    
+    const canvas = document.getElementById('pongCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    const paddle = {w: 10, h: 80, speed: 6};
+    let p1 = {x: 10, y: canvas.height / 2 - paddle.h / 2, score: 0};
+    let p2 = {x: canvas.width - 10 - paddle.w, y: canvas.height / 2 - paddle.h / 2, score: 0};
+    let ball = {x: canvas.width / 2, y: canvas.height / 2, r: 8, dx: 3, dy: 3};
+    let wPressed = false, sPressed = false;
+    
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'w' || e.key === 'W') wPressed = true;
+      if(e.key === 's' || e.key === 'S') sPressed = true;
+      if(e.key === 'Escape') gameDiv.remove();
+    });
+    
+    document.addEventListener('keyup', (e) => {
+      if(e.key === 'w' || e.key === 'W') wPressed = false;
+      if(e.key === 's' || e.key === 'S') sPressed = false;
+    });
+    
+    function draw() {
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.fillStyle = '#2ecc71';
+      ctx.fillRect(p1.x, p1.y, paddle.w, paddle.h);
+      ctx.fillRect(p2.x, p2.y, paddle.w, paddle.h);
+      
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+      ctx.fillStyle = '#2ecc71';
+      ctx.fill();
+      ctx.closePath();
+      
+      ctx.font = '30px Arial';
+      ctx.fillText(p1.score, canvas.width / 4, 50);
+      ctx.fillText(p2.score, 3 * canvas.width / 4, 50);
+      
+      if(wPressed && p1.y > 0) p1.y -= paddle.speed;
+      if(sPressed && p1.y < canvas.height - paddle.h) p1.y += paddle.speed;
+      
+      p2.y += (ball.y - (p2.y + paddle.h / 2)) * 0.1;
+      
+      ball.x += ball.dx;
+      ball.y += ball.dy;
+      
+      if(ball.y + ball.r > canvas.height || ball.y - ball.r < 0) ball.dy = -ball.dy;
+      
+      if(ball.x - ball.r < p1.x + paddle.w && ball.y > p1.y && ball.y < p1.y + paddle.h) ball.dx = -ball.dx;
+      if(ball.x + ball.r > p2.x && ball.y > p2.y && ball.y < p2.y + paddle.h) ball.dx = -ball.dx;
+      
+      if(ball.x < 0) {
+        p2.score++;
+        ball.x = canvas.width / 2;
+        ball.y = canvas.height / 2;
+        ball.dx = 3;
+      }
+      if(ball.x > canvas.width) {
+        p1.score++;
+        ball.x = canvas.width / 2;
+        ball.y = canvas.height / 2;
+        ball.dx = -3;
+      }
+      
+      requestAnimationFrame(draw);
+    }
+    draw();
+  };
+
+  /* TETRIS GAME */
+  root.querySelector("#tetris").onclick = () => {
+    if(document.getElementById('ziperTetris')) {
+      document.getElementById('ziperTetris').remove();
+      return;
+    }
+    
+    const gameDiv = document.createElement('div');
+    gameDiv.id = 'ziperTetris';
+    gameDiv.style = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999998;background:#000;padding:20px;border-radius:10px;border:3px solid #2ecc71;';
+    gameDiv.innerHTML = '<canvas id="tetrisCanvas" width="240" height="400"></canvas><div style="text-align:center;color:#2ecc71;margin-top:10px;">Arrow Keys | Space to Drop | ESC to Close</div>';
+    document.body.appendChild(gameDiv);
+    
+    const canvas = document.getElementById('tetrisCanvas');
+    const ctx = canvas.getContext('2d');
+    const COLS = 12, ROWS = 20, BLOCK = 20;
+    
+    let board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+    let piece = {x: 5, y: 0, shape: [[1,1,1,1]]};
+    let score = 0;
+    
+    const shapes = [
+      [[1,1,1,1]],
+      [[1,1],[1,1]],
+      [[1,1,1],[0,1,0]],
+      [[1,1,1],[1,0,0]],
+      [[1,1,1],[0,0,1]]
+    ];
+    
+    function newPiece() {
+      piece = {x: 5, y: 0, shape: shapes[Math.floor(Math.random() * shapes.length)]};
+    }
+    
+    function draw() {
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      for(let r = 0; r < ROWS; r++) {
+        for(let c = 0; c < COLS; c++) {
+          if(board[r][c]) {
+            ctx.fillStyle = '#27ae60';
+            ctx.fillRect(c * BLOCK, r * BLOCK, BLOCK - 1, BLOCK - 1);
+          }
+        }
+      }
+      
+      ctx.fillStyle = '#2ecc71';
+      for(let r = 0; r < piece.shape.length; r++) {
+        for(let c = 0; c < piece.shape[r].length; c++) {
+          if(piece.shape[r][c]) {
+            ctx.fillRect((piece.x + c) * BLOCK, (piece.y + r) * BLOCK, BLOCK - 1, BLOCK - 1);
+          }
+        }
+      }
+      
+      ctx.fillStyle = '#2ecc71';
+      ctx.font = '16px Arial';
+      ctx.fillText('Score: ' + score, 10, 20);
+    }
+    
+    function canMove(dx, dy) {
+      for(let r = 0; r < piece.shape.length; r++) {
+        for(let c = 0; c < piece.shape[r].length; c++) {
+          if(piece.shape[r][c]) {
+            const newX = piece.x + c + dx;
+            const newY = piece.y + r + dy;
+            if(newX < 0 || newX >= COLS || newY >= ROWS || (newY >= 0 && board[newY][newX])) {
+              return false;
+            }
+          }
+        }
+      }
+      return true;
+    }
+    
+    function merge() {
+      for(let r = 0; r < piece.shape.length; r++) {
+        for(let c = 0; c < piece.shape[r].length; c++) {
+          if(piece.shape[r][c]) {
+            board[piece.y + r][piece.x + c] = 1;
+          }
+        }
+      }
+      
+      for(let r = ROWS - 1; r >= 0; r--) {
+        if(board[r].every(cell => cell)) {
+          board.splice(r, 1);
+          board.unshift(Array(COLS).fill(0));
+          score += 10;
+          r++;
+        }
+      }
+    }
+    
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'ArrowLeft' && canMove(-1, 0)) piece.x--;
+      else if(e.key === 'ArrowRight' && canMove(1, 0)) piece.x++;
+      else if(e.key === 'ArrowDown' && canMove(0, 1)) piece.y++;
+      else if(e.key === ' ') {
+        while(canMove(0, 1)) piece.y++;
+      } else if(e.key === 'Escape') gameDiv.remove();
+    });
+    
+    function update() {
+      if(canMove(0, 1)) {
+        piece.y++;
+      } else {
+        merge();
+        newPiece();
+        if(!canMove(0, 0)) {
+          alert('Game Over! Score: ' + score);
+          gameDiv.remove();
+          return;
+        }
+      }
+      draw();
+    }
+    
+    const game = setInterval(() => {
+      if(!document.getElementById('ziperTetris')) clearInterval(game);
+      else update();
+    }, 500);
+    draw();
+  };
+
+  /* SPACE SHOOTER GAME */
+  root.querySelector("#spaceshooter").onclick = () => {
+    if(document.getElementById('ziperSpace')) {
+      document.getElementById('ziperSpace').remove();
+      return;
+    }
+    
+    const gameDiv = document.createElement('div');
+    gameDiv.id = 'ziperSpace';
+    gameDiv.style = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999998;background:#000;padding:20px;border-radius:10px;border:3px solid #2ecc71;';
+    gameDiv.innerHTML = '<canvas id="spaceCanvas" width="400" height="500"></canvas><div style="text-align:center;color:#2ecc71;margin-top:10px;">Arrow Keys | Space to Shoot | ESC to Close</div>';
+    document.body.appendChild(gameDiv);
+    
+    const canvas = document.getElementById('spaceCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    let player = {x: canvas.width / 2 - 15, y: canvas.height - 60, w: 30, h: 30, speed: 5};
+    let bullets = [];
+    let enemies = [];
+    let score = 0;
+    let leftPressed = false, rightPressed = false, spacePressed = false;
+    let lastShot = 0;
+    
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'ArrowLeft') leftPressed = true;
+      if(e.key === 'ArrowRight') rightPressed = true;
+      if(e.key === ' ') spacePressed = true;
+      if(e.key === 'Escape') gameDiv.remove();
+    });
+    
+    document.addEventListener('keyup', (e) => {
+      if(e.key === 'ArrowLeft') leftPressed = false;
+      if(e.key === 'ArrowRight') rightPressed = false;
+      if(e.key === ' ') spacePressed = false;
+    });
+    
+    function spawnEnemy() {
+      enemies.push({x: Math.random() * (canvas.width - 30), y: -30, w: 30, h: 30});
+    }
+    
+    function draw() {
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.fillStyle = '#2ecc71';
+      ctx.fillRect(player.x, player.y, player.w, player.h);
+      
+      ctx.fillStyle = '#27ae60';
+      bullets.forEach(b => ctx.fillRect(b.x, b.y, b.w, b.h));
+      
+      ctx.fillStyle = '#e74c3c';
+      enemies.forEach(e => ctx.fillRect(e.x, e.y, e.w, e.h));
+      
+      ctx.fillStyle = '#2ecc71';
+      ctx.font = '20px Arial';
+      ctx.fillText('Score: ' + score, 10, 30);
+      
+      if(leftPressed && player.x > 0) player.x -= player.speed;
+      if(rightPressed && player.x < canvas.width - player.w) player.x += player.speed;
+      
+      const now = Date.now();
+      if(spacePressed && now - lastShot > 250) {
+        bullets.push({x: player.x + player.w / 2 - 2, y: player.y, w: 4, h: 10, speed: 7});
+        lastShot = now;
+      }
+      
+      bullets.forEach((b, i) => {
+        b.y -= b.speed;
+        if(b.y < 0) bullets.splice(i, 1);
+      });
+      
+      enemies.forEach((e, i) => {
+        e.y += 2;
+        if(e.y > canvas.height) enemies.splice(i, 1);
+        
+        if(e.x < player.x + player.w && e.x + e.w > player.x && e.y < player.y + player.h && e.y + e.h > player.y) {
+          alert('Game Over! Score: ' + score);
+          gameDiv.remove();
+        }
+      });
+      
+      bullets.forEach((b, bi) => {
+        enemies.forEach((e, ei) => {
+          if(b.x < e.x + e.w && b.x + b.w > e.x && b.y < e.y + e.h && b.y + b.h > e.y) {
+            bullets.splice(bi, 1);
+            enemies.splice(ei, 1);
+            score += 10;
+          }
+        });
+      });
+      
+      if(Math.random() < 0.02) spawnEnemy();
+      
+      requestAnimationFrame(draw);
+    }
+    draw();
+  };
+
+  /* ===== CUSTOM JS RUNNER ===== */
+  root.querySelector("#runCustomJS").onclick = () => {
+    const code = root.querySelector("#customJS").value.trim();
+    const responseDiv = root.querySelector("#customResponse");
+    
+    if(!code) {
+      responseDiv.innerHTML = '<div class="chat-response" style="border-left-color:#f39c12;">⚠️ Please enter some JavaScript code first.</div>';
+      return;
+    }
+    
+    try {
+      // Execute the code
+      const result = eval(code);
+      responseDiv.innerHTML = '<div class="chat-response" style="border-left-color:#2ecc71;">✅ Code executed successfully!' + (result !== undefined ? '<br><br>Return value: ' + escapeHtml(String(result)) : '') + '</div>';
+    } catch(e) {
+      responseDiv.innerHTML = '<div class="chat-response" style="border-left-color:#e74c3c;">❌ Error:<br>' + escapeHtml(e.message) + '</div>';
+    }
   };
 
 })();
