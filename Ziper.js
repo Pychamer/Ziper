@@ -312,7 +312,10 @@
       </div>
       <div class="tab-content" id="custom-tab">
         <div class="warning-box">
-          ⚠️ <strong>WARNING:</strong> Only run JavaScript code you trust. Malicious code can harm your device or steal data.
+          ⚠️ <strong>SECURITY WARNING:</strong> Only run JavaScript code you trust!<br>
+          • Malicious code can steal data or compromise your session<br>
+          • Code runs with full page access (eval is used by design)<br>
+          • Never paste code from untrusted sources
         </div>
         <textarea class="custom-textarea" id="customJS" placeholder="// Enter your custom JavaScript code here&#10;// Example:&#10;alert('Hello from Ziper!');&#10;&#10;// Change background color&#10;document.body.style.backgroundColor = '#ff0000';&#10;&#10;// Add custom animations&#10;// document.body.style.transition = 'all 2s';"></textarea>
         <button class="run-btn" id="runCustomJS">▶️ Run Custom Code</button>
@@ -590,7 +593,7 @@
     if(document.body.style.imageRendering === 'pixelated') {
       document.body.style.imageRendering = '';
       document.body.style.filter = '';
-      document.querySelectorAll('*').forEach(el => {
+      document.querySelectorAll('img, video, canvas').forEach(el => {
         el.style.imageRendering = '';
       });
       return;
@@ -608,6 +611,12 @@
     if(window.ziperMoveMode) {
       window.ziperMoveMode = false;
       document.body.style.cursor = 'default';
+      if(window.ziperMoveHandlers) {
+        document.removeEventListener('mousedown', window.ziperMoveHandlers.down);
+        document.removeEventListener('mousemove', window.ziperMoveHandlers.move);
+        document.removeEventListener('mouseup', window.ziperMoveHandlers.up);
+        window.ziperMoveHandlers = null;
+      }
       alert('Move Anything mode deactivated!');
       return;
     }
@@ -643,35 +652,25 @@
     document.addEventListener('mousedown', mouseDownHandler);
     document.addEventListener('mousemove', mouseMoveHandler);
     document.addEventListener('mouseup', mouseUpHandler);
+    
+    window.ziperMoveHandlers = {down: mouseDownHandler, move: mouseMoveHandler, up: mouseUpHandler};
   };
 
   /* ===== SCREEN EFFECTS ===== */
   
   /* Blur Screen */
   root.querySelector("#blur").onclick = () => {
-    if(document.body.style.filter.includes('blur')) {
-      document.body.style.filter = '';
-    } else {
-      document.body.style.filter = 'blur(5px)';
-    }
+    document.body.style.filter = document.body.style.filter ? '' : 'blur(5px)';
   };
 
   /* Grayscale */
   root.querySelector("#grayscale").onclick = () => {
-    if(document.body.style.filter.includes('grayscale')) {
-      document.body.style.filter = '';
-    } else {
-      document.body.style.filter = 'grayscale(100%)';
-    }
+    document.body.style.filter = document.body.style.filter ? '' : 'grayscale(100%)';
   };
 
   /* Sepia */
   root.querySelector("#sepia").onclick = () => {
-    if(document.body.style.filter.includes('sepia')) {
-      document.body.style.filter = '';
-    } else {
-      document.body.style.filter = 'sepia(100%)';
-    }
+    document.body.style.filter = document.body.style.filter ? '' : 'sepia(100%)';
   };
 
   /* Hue Rotate */
@@ -691,20 +690,12 @@
 
   /* Brightness */
   root.querySelector("#brightness").onclick = () => {
-    if(document.body.style.filter.includes('brightness')) {
-      document.body.style.filter = '';
-    } else {
-      document.body.style.filter = 'brightness(150%)';
-    }
+    document.body.style.filter = document.body.style.filter ? '' : 'brightness(150%)';
   };
 
   /* Contrast */
   root.querySelector("#contrast").onclick = () => {
-    if(document.body.style.filter.includes('contrast')) {
-      document.body.style.filter = '';
-    } else {
-      document.body.style.filter = 'contrast(200%)';
-    }
+    document.body.style.filter = document.body.style.filter ? '' : 'contrast(200%)';
   };
 
   /* ===== GAMES ===== */
@@ -1184,30 +1175,34 @@
         lastShot = now;
       }
       
-      bullets.forEach((b, i) => {
+      bullets = bullets.filter(b => {
         b.y -= b.speed;
-        if(b.y < 0) bullets.splice(i, 1);
+        return b.y >= 0;
       });
       
-      enemies.forEach((e, i) => {
+      enemies = enemies.filter((e, i) => {
         e.y += 2;
-        if(e.y > canvas.height) enemies.splice(i, 1);
+        if(e.y > canvas.height) return false;
         
         if(e.x < player.x + player.w && e.x + e.w > player.x && e.y < player.y + player.h && e.y + e.h > player.y) {
           alert('Game Over! Score: ' + score);
           gameDiv.remove();
         }
+        return true;
       });
       
-      bullets.forEach((b, bi) => {
-        enemies.forEach((e, ei) => {
+      for(let bi = bullets.length - 1; bi >= 0; bi--) {
+        const b = bullets[bi];
+        for(let ei = enemies.length - 1; ei >= 0; ei--) {
+          const e = enemies[ei];
           if(b.x < e.x + e.w && b.x + b.w > e.x && b.y < e.y + e.h && b.y + b.h > e.y) {
             bullets.splice(bi, 1);
             enemies.splice(ei, 1);
             score += 10;
+            break;
           }
-        });
-      });
+        }
+      }
       
       if(Math.random() < 0.02) spawnEnemy();
       
