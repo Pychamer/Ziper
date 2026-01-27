@@ -6,6 +6,67 @@
   const HF_TOKEN = "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"; // Hugging Face API token
   const HF_MODEL = "HuggingFaceTB/SmolLM2-360M-Instruct"; // AI Model
   const AI_ENABLED = true; // Re-enabled with Hugging Face
+  
+  /* ===== THEME SYSTEM ===== */
+  const THEMES = {
+    green: {
+      name: "Matrix Green",
+      primary: "#27ae60",
+      secondary: "#2ecc71",
+      bgDark: "#0d1b0e",
+      bgLight: "#1a3a1f",
+      text: "#e0ffe0",
+      textMuted: "#7fb887",
+      shadow: "rgba(0,255,0,.2)",
+      minimized: { bg: "#1a1a2e", bgAlt: "#16213e", border: "#0f3460", btn: "#1a4d2e" }
+    },
+    blue: {
+      name: "Ocean Blue",
+      primary: "#2980b9",
+      secondary: "#3498db",
+      bgDark: "#0b0e1b",
+      bgLight: "#1f2a3a",
+      text: "#e0f0ff",
+      textMuted: "#7f9db8",
+      shadow: "rgba(0,100,255,.2)",
+      minimized: { bg: "#1a1a2e", bgAlt: "#162138", border: "#0f2460", btn: "#1a3d4d" }
+    },
+    purple: {
+      name: "Royal Purple",
+      primary: "#8e44ad",
+      secondary: "#9b59b6",
+      bgDark: "#1b0b1e",
+      bgLight: "#3a1f3f",
+      text: "#f0e0ff",
+      textMuted: "#b87fa8",
+      shadow: "rgba(150,0,255,.2)",
+      minimized: { bg: "#1a1a2e", bgAlt: "#21163e", border: "#300f60", btn: "#3d1a4d" }
+    },
+    red: {
+      name: "Fire Red",
+      primary: "#c0392b",
+      secondary: "#e74c3c",
+      bgDark: "#1b0b0d",
+      bgLight: "#3a1f1f",
+      text: "#ffe0e0",
+      textMuted: "#b87f7f",
+      shadow: "rgba(255,0,0,.2)",
+      minimized: { bg: "#1a1a2e", bgAlt: "#3e1616", border: "#600f0f", btn: "#4d1a1a" }
+    },
+    orange: {
+      name: "Sunset Orange",
+      primary: "#d35400",
+      secondary: "#e67e22",
+      bgDark: "#1b0f0b",
+      bgLight: "#3a2a1f",
+      text: "#fff0e0",
+      textMuted: "#b89f7f",
+      shadow: "rgba(255,100,0,.2)",
+      minimized: { bg: "#1a1a2e", bgAlt: "#3e2616", border: "#602f0f", btn: "#4d2a1a" }
+    }
+  };
+  
+  let currentTheme = localStorage.getItem("ziperTheme") || "green";
 
   /* ===== ROOT (PROTECTED) ===== */
   const root = document.createElement("div");
@@ -165,6 +226,29 @@
       }
       #ziperRoot .close-btn:hover{
         background:#c0392b;
+      }
+      #ziperRoot .theme-btn{
+        width:100%;
+        padding:10px;
+        background:#1a3a1f;
+        border:2px solid #27ae60;
+        color:#2ecc71;
+        border-radius:8px;
+        cursor:pointer;
+        font-size:14px;
+        transition:all .2s;
+        text-align:left;
+      }
+      #ziperRoot .theme-btn:hover{
+        background:#27ae60;
+        color:#fff;
+        transform:translateX(4px);
+      }
+      #ziperRoot .theme-btn.active{
+        background:#27ae60;
+        color:#fff;
+        border-color:#2ecc71;
+        font-weight:bold;
       }
       #ziperRoot .minimize-btn{
         background:#f39c12;
@@ -341,11 +425,21 @@
           <p><strong style="color:#2ecc71;">Version:</strong> v1.1.0 RELEASE</p>
           <p><strong style="color:#2ecc71;">API:</strong> Hugging Face AI</p>
           <p><strong style="color:#2ecc71;">Model:</strong> SmolLM2-360M</p>
-          <p><strong style="color:#2ecc71;">Theme:</strong> Matrix Green</p>
           <p style="margin-top:12px;font-size:12px;color:#2ecc71;">✅ AI Chat enabled</p>
           <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Custom JS runner</p>
           <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Fun effects & games</p>
           <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Screen filters</p>
+          
+          <div style="margin-top:20px;padding-top:16px;border-top:1px solid #27ae60;">
+            <p style="margin-bottom:12px;"><strong style="color:#2ecc71;">🎨 Theme:</strong></p>
+            <div id="themeSelector" style="display:flex;flex-direction:column;gap:8px;">
+              <button class="theme-btn" data-theme="green">🌲 Matrix Green</button>
+              <button class="theme-btn" data-theme="blue">🌊 Ocean Blue</button>
+              <button class="theme-btn" data-theme="purple">👑 Royal Purple</button>
+              <button class="theme-btn" data-theme="red">🔥 Fire Red</button>
+              <button class="theme-btn" data-theme="orange">🌅 Sunset Orange</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -413,18 +507,19 @@
       minimizeBtn.textContent = "+";
       
       // Apply dark blue minimized theme
-      root.style.background = "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)";
-      root.style.border = "2px solid #0f3460";
+      const theme = THEMES[currentTheme];
+      root.style.background = `linear-gradient(135deg, ${theme.minimized.bg} 0%, ${theme.minimized.bgAlt} 100%)`;
+      root.style.border = `2px solid ${theme.minimized.border}`;
       root.style.boxShadow = "0 2px 8px rgba(0,0,0,.3)";
       root.style.opacity = "0.7";
-      headerDiv.style.background = "linear-gradient(90deg, #0f3460 0%, #16213e 100%)";
-      headerDiv.style.borderBottom = "2px solid #0f3460";
+      headerDiv.style.background = `linear-gradient(90deg, ${theme.minimized.border} 0%, ${theme.minimized.bgAlt} 100%)`;
+      headerDiv.style.borderBottom = `2px solid ${theme.minimized.border}`;
       
-      // Make buttons smaller and dark green
-      minimizeBtn.style.background = "#1a4d2e";
+      // Make buttons smaller and use theme's minimized button color
+      minimizeBtn.style.background = theme.minimized.btn;
       minimizeBtn.style.padding = "4px 8px";
       minimizeBtn.style.fontSize = "12px";
-      closeBtn.style.background = "#1a4d2e";
+      closeBtn.style.background = theme.minimized.btn;
       closeBtn.style.padding = "4px 8px";
       closeBtn.style.fontSize = "10px";
       
@@ -434,22 +529,23 @@
       
       isMinimized = true;
     } else {
-      // Maximize: Show content and tabs, restore green theme with full title
+      // Maximize: Show content and tabs, restore current theme with full title
       contentDiv.style.display = originalContent || "block";
       tabsDiv.style.display = "flex";
       root.style.width = "380px";
       minimizeBtn.textContent = "−";
       
-      // Restore green theme
-      root.style.background = "linear-gradient(135deg, #0d1b0e 0%, #1a3a1f 100%)";
-      root.style.border = "2px solid #2ecc71";
-      root.style.boxShadow = "0 8px 32px rgba(0,255,0,.2)";
+      // Restore current theme
+      const theme = THEMES[currentTheme];
+      root.style.background = `linear-gradient(135deg, ${theme.bgDark} 0%, ${theme.bgLight} 100%)`;
+      root.style.border = `2px solid ${theme.secondary}`;
+      root.style.boxShadow = `0 8px 32px ${theme.shadow}`;
       root.style.opacity = "1";
-      headerDiv.style.background = "linear-gradient(90deg, #27ae60 0%, #2ecc71 100%)";
-      headerDiv.style.borderBottom = "2px solid #27ae60";
+      headerDiv.style.background = `linear-gradient(90deg, ${theme.primary} 0%, ${theme.secondary} 100%)`;
+      headerDiv.style.borderBottom = `2px solid ${theme.primary}`;
       
       // Restore button colors and sizes
-      minimizeBtn.style.background = "#f39c12";
+      minimizeBtn.style.background = theme.primary;
       minimizeBtn.style.padding = "6px 12px";
       minimizeBtn.style.fontSize = "16px";
       closeBtn.style.background = "#e74c3c";
@@ -473,6 +569,80 @@
       toggleMinimize();
     }
   });
+
+  /* ===== THEME SYSTEM ===== */
+  const applyTheme = (themeName) => {
+    const theme = THEMES[themeName];
+    if(!theme) return;
+    
+    currentTheme = themeName;
+    localStorage.setItem("ziperTheme", themeName);
+    
+    // Update root widget styles
+    root.style.background = `linear-gradient(135deg, ${theme.bgDark} 0%, ${theme.bgLight} 100%)`;
+    root.style.border = `2px solid ${theme.secondary}`;
+    root.style.boxShadow = `0 8px 32px ${theme.shadow}`;
+    root.style.color = theme.text;
+    
+    // Update header
+    const headerDiv = root.querySelector(".header");
+    if(headerDiv && !isMinimized) {
+      headerDiv.style.background = `linear-gradient(90deg, ${theme.primary} 0%, ${theme.secondary} 100%)`;
+      headerDiv.style.borderBottom = `2px solid ${theme.primary}`;
+    }
+    
+    // Update all dynamic color references
+    root.querySelectorAll(".tab.active, .sub-tab.active").forEach(el => {
+      el.style.color = theme.secondary;
+      el.style.borderBottomColor = theme.secondary;
+    });
+    
+    root.querySelectorAll(".tab, .sub-tab").forEach(el => {
+      el.style.color = theme.textMuted;
+    });
+    
+    root.querySelectorAll(".feature-btn, .send-btn, .execute-btn").forEach(btn => {
+      if(btn.classList.contains("feature-btn") || btn.classList.contains("execute-btn")) {
+        btn.style.background = theme.bgLight;
+        btn.style.borderColor = theme.primary;
+        btn.style.color = theme.secondary;
+      } else if(btn.classList.contains("send-btn")) {
+        btn.style.background = theme.primary;
+      }
+    });
+    
+    // Update theme buttons active state
+    root.querySelectorAll(".theme-btn").forEach(btn => {
+      if(btn.getAttribute("data-theme") === themeName) {
+        btn.classList.add("active");
+        btn.style.background = theme.primary;
+        btn.style.borderColor = theme.secondary;
+      } else {
+        btn.classList.remove("active");
+        btn.style.background = theme.bgLight;
+        btn.style.borderColor = theme.primary;
+      }
+    });
+    
+    // Update minimize button color to match theme (only when not minimized)
+    if(!isMinimized) {
+      const minimizeBtn = root.querySelector("#minimizeWidget");
+      if(minimizeBtn) {
+        minimizeBtn.style.background = theme.primary;
+      }
+    }
+  };
+  
+  // Theme selector event handlers
+  root.querySelectorAll(".theme-btn").forEach(btn => {
+    btn.onclick = () => {
+      const themeName = btn.getAttribute("data-theme");
+      applyTheme(themeName);
+    };
+  });
+  
+  // Apply saved theme on load
+  applyTheme(currentTheme);
 
   /* ===== AI CHAT WITH HUGGING FACE ===== */
   root.querySelector("#sendChat").onclick = async () => {

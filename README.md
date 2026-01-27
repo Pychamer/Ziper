@@ -49,9 +49,16 @@ A powerful client-side JavaScript bookmarklet that injects a floating control pa
 - **Smart Error Handling** - Clear feedback for all scenarios
 - **30-Second Timeout** - Prevents hanging requests
 
+### ⚙️ Theme Customization (NEW!)
+- **5 Color Themes** - Choose from Matrix Green, Ocean Blue, Royal Purple, Fire Red, or Sunset Orange
+- **Persistent Selection** - Your theme choice is saved and restored on reload
+- **Full Widget Styling** - All colors update including buttons, borders, and backgrounds
+- **Minimized State Support** - Themes respect the stealth blue minimized appearance
+
 ## 🎨 UI Design
 
-- **Matrix Green Theme** - Inspired by classic terminal aesthetics
+- **Customizable Themes** - Choose from 5 color schemes in Settings tab
+- **Matrix Green Theme** - Default inspired by classic terminal aesthetics
 - **Tabbed Interface** - Organized navigation (Chat, Features, Custom, Settings)
 - **Sub-Tab Organization** - Basic, Tools, Fun, Screen, and Games sections
 - **Responsive Design** - Adapts to different screen sizes
@@ -88,7 +95,7 @@ A powerful client-side JavaScript bookmarklet that injects a floating control pa
      - **🖥️ Screen** - Visual filters and effects
      - **🎮 Games** - Built-in mini-games
    - **⚡ Custom** - Custom JavaScript code runner
-   - **⚙️ Settings** - Configuration and version info
+   - **⚙️ Settings** - Configuration, version info, and theme customization
 
 ### ⌨️ Keyboard Shortcuts & Controls
 - **Ctrl+R** - Minimize/Maximize Ziper widget
