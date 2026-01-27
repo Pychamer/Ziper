@@ -90,6 +90,9 @@ A powerful client-side JavaScript bookmarklet that injects a floating control pa
    - **⚡ Custom** - Custom JavaScript code runner
    - **⚙️ Settings** - Configuration and version info
 
+### ⌨️ Keyboard Shortcuts
+- **Ctrl+E** - Minimize/Maximize Ziper widget (toggle between header-only and full view)
+
 ## 🎮 Game Controls
 
 - **Breakout**: Arrow keys to move paddle, ESC to close

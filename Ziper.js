@@ -369,6 +369,34 @@
     root.remove();
   };
 
+  /* ===== MINIMIZE/MAXIMIZE WITH CTRL+E ===== */
+  let isMinimized = false;
+  let originalContent = null;
+  
+  document.addEventListener("keydown", (e) => {
+    if(e.ctrlKey && e.key.toLowerCase() === "e") {
+      e.preventDefault();
+      
+      const contentDiv = root.querySelector(".content");
+      const tabsDiv = root.querySelector(".tabs");
+      
+      if(!isMinimized) {
+        // Minimize: Hide content and tabs
+        originalContent = contentDiv.style.display;
+        contentDiv.style.display = "none";
+        tabsDiv.style.display = "none";
+        root.style.width = "auto";
+        isMinimized = true;
+      } else {
+        // Maximize: Show content and tabs
+        contentDiv.style.display = originalContent || "block";
+        tabsDiv.style.display = "flex";
+        root.style.width = "380px";
+        isMinimized = false;
+      }
+    }
+  });
+
   /* ===== AI CHAT WITH HUGGING FACE ===== */
   root.querySelector("#sendChat").onclick = async () => {
     const input = root.querySelector("#chatInput");
