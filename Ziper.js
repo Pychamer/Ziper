@@ -399,6 +399,7 @@
     const contentDiv = root.querySelector(".content");
     const tabsDiv = root.querySelector(".tabs");
     const minimizeBtn = root.querySelector("#minimizeWidget");
+    const closeBtn = root.querySelector("#closeWidget");
     const headerDiv = root.querySelector(".header");
     const titleH3 = root.querySelector(".header h3");
     const betaBadge = root.querySelector(".beta-badge");
@@ -419,6 +420,14 @@
       headerDiv.style.background = "linear-gradient(90deg, #0f3460 0%, #16213e 100%)";
       headerDiv.style.borderBottom = "2px solid #0f3460";
       
+      // Make buttons smaller and dark green
+      minimizeBtn.style.background = "#1a4d2e";
+      minimizeBtn.style.padding = "4px 8px";
+      minimizeBtn.style.fontSize = "12px";
+      closeBtn.style.background = "#1a4d2e";
+      closeBtn.style.padding = "4px 8px";
+      closeBtn.style.fontSize = "10px";
+      
       // Change title to "ZP" and hide BETA badge
       titleH3.textContent = "ZP";
       if(betaBadge) betaBadge.style.display = "none";
@@ -438,6 +447,14 @@
       root.style.opacity = "1";
       headerDiv.style.background = "linear-gradient(90deg, #27ae60 0%, #2ecc71 100%)";
       headerDiv.style.borderBottom = "2px solid #27ae60";
+      
+      // Restore button colors and sizes
+      minimizeBtn.style.background = "#f39c12";
+      minimizeBtn.style.padding = "6px 12px";
+      minimizeBtn.style.fontSize = "16px";
+      closeBtn.style.background = "#e74c3c";
+      closeBtn.style.padding = "6px 12px";
+      closeBtn.style.fontSize = "12px";
       
       // Restore original title with BETA badge
       titleH3.innerHTML = '🌲 Ziper <span class="beta-badge">BETA</span>';
