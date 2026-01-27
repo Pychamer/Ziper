@@ -166,6 +166,24 @@
       #ziperRoot .close-btn:hover{
         background:#c0392b;
       }
+      #ziperRoot .minimize-btn{
+        background:#f39c12;
+        color:#fff;
+        border:none;
+        padding:6px 12px;
+        border-radius:6px;
+        cursor:pointer;
+        font-size:16px;
+        font-weight:bold;
+        margin-right:8px;
+      }
+      #ziperRoot .minimize-btn:hover{
+        background:#e67e22;
+      }
+      #ziperRoot .header > div{
+        display:flex;
+        align-items:center;
+      }
       #ziperRoot .sub-tabs{
         display:flex;
         background:#0a150b;
@@ -252,7 +270,10 @@
     </style>
     <div class="header">
       <h3>🌲 Ziper <span class="beta-badge">BETA</span></h3>
-      <button class="close-btn" id="closeWidget">✕</button>
+      <div>
+        <button class="minimize-btn" id="minimizeWidget">−</button>
+        <button class="close-btn" id="closeWidget">✕</button>
+      </div>
     </div>
     <div class="tabs">
       <button class="tab active" data-tab="chat">💬 Chat</button>
@@ -369,31 +390,42 @@
     root.remove();
   };
 
-  /* ===== MINIMIZE/MAXIMIZE WITH CTRL+E ===== */
+  /* ===== MINIMIZE/MAXIMIZE WITH CTRL+R AND BUTTON ===== */
   let isMinimized = false;
   let originalContent = null;
   
+  // Toggle function for minimize/maximize
+  const toggleMinimize = () => {
+    const contentDiv = root.querySelector(".content");
+    const tabsDiv = root.querySelector(".tabs");
+    const minimizeBtn = root.querySelector("#minimizeWidget");
+    
+    if(!isMinimized) {
+      // Minimize: Hide content and tabs
+      originalContent = contentDiv.style.display;
+      contentDiv.style.display = "none";
+      tabsDiv.style.display = "none";
+      root.style.width = "auto";
+      minimizeBtn.textContent = "+";
+      isMinimized = true;
+    } else {
+      // Maximize: Show content and tabs
+      contentDiv.style.display = originalContent || "block";
+      tabsDiv.style.display = "flex";
+      root.style.width = "380px";
+      minimizeBtn.textContent = "−";
+      isMinimized = false;
+    }
+  };
+  
+  // Minimize button click handler
+  root.querySelector("#minimizeWidget").onclick = toggleMinimize;
+  
+  // Keyboard shortcut: Ctrl+R
   document.addEventListener("keydown", (e) => {
-    if(e.ctrlKey && e.key.toLowerCase() === "e") {
+    if(e.ctrlKey && e.key.toLowerCase() === "r") {
       e.preventDefault();
-      
-      const contentDiv = root.querySelector(".content");
-      const tabsDiv = root.querySelector(".tabs");
-      
-      if(!isMinimized) {
-        // Minimize: Hide content and tabs
-        originalContent = contentDiv.style.display;
-        contentDiv.style.display = "none";
-        tabsDiv.style.display = "none";
-        root.style.width = "auto";
-        isMinimized = true;
-      } else {
-        // Maximize: Show content and tabs
-        contentDiv.style.display = originalContent || "block";
-        tabsDiv.style.display = "flex";
-        root.style.width = "380px";
-        isMinimized = false;
-      }
+      toggleMinimize();
     }
   });
 

@@ -91,7 +91,8 @@ A powerful client-side JavaScript bookmarklet that injects a floating control pa
    - **⚙️ Settings** - Configuration and version info
 
 ### ⌨️ Keyboard Shortcuts
-- **Ctrl+E** - Minimize/Maximize Ziper widget (toggle between header-only and full view)
+- **Ctrl+R** - Minimize/Maximize Ziper widget (toggle between header-only and full view)
+- **Minimize Button** - Click the "−" button in header to minimize, "+" to maximize
 
 ## 🎮 Game Controls
 
