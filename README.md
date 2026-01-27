@@ -90,9 +90,14 @@ A powerful client-side JavaScript bookmarklet that injects a floating control pa
    - **⚡ Custom** - Custom JavaScript code runner
    - **⚙️ Settings** - Configuration and version info
 
-### ⌨️ Keyboard Shortcuts
-- **Ctrl+R** - Minimize/Maximize Ziper widget (toggle between header-only and full view)
-- **Minimize Button** - Click the "−" button in header to minimize, "+" to maximize
+### ⌨️ Keyboard Shortcuts & Controls
+- **Ctrl+R** - Minimize/Maximize Ziper widget
+- **Minimize Button (−/+)** - Click in header to toggle minimize/maximize
+- **Minimized Mode**: 
+  - Shows only "ZP" text (no "Ziper" or BETA badge)
+  - Dark blue theme (barely noticeable)
+  - Reduced opacity (70%)
+  - Compact size for minimal screen space
 
 ## 🎮 Game Controls
 

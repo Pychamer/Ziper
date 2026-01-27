@@ -399,21 +399,49 @@
     const contentDiv = root.querySelector(".content");
     const tabsDiv = root.querySelector(".tabs");
     const minimizeBtn = root.querySelector("#minimizeWidget");
+    const headerDiv = root.querySelector(".header");
+    const titleH3 = root.querySelector(".header h3");
+    const betaBadge = root.querySelector(".beta-badge");
     
     if(!isMinimized) {
-      // Minimize: Hide content and tabs
+      // Minimize: Hide content and tabs, change to dark blue theme with "ZP"
       originalContent = contentDiv.style.display;
       contentDiv.style.display = "none";
       tabsDiv.style.display = "none";
       root.style.width = "auto";
       minimizeBtn.textContent = "+";
+      
+      // Apply dark blue minimized theme
+      root.style.background = "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)";
+      root.style.border = "2px solid #0f3460";
+      root.style.boxShadow = "0 2px 8px rgba(0,0,0,.3)";
+      root.style.opacity = "0.7";
+      headerDiv.style.background = "linear-gradient(90deg, #0f3460 0%, #16213e 100%)";
+      headerDiv.style.borderBottom = "2px solid #0f3460";
+      
+      // Change title to "ZP" and hide BETA badge
+      titleH3.textContent = "ZP";
+      if(betaBadge) betaBadge.style.display = "none";
+      
       isMinimized = true;
     } else {
-      // Maximize: Show content and tabs
+      // Maximize: Show content and tabs, restore green theme with full title
       contentDiv.style.display = originalContent || "block";
       tabsDiv.style.display = "flex";
       root.style.width = "380px";
       minimizeBtn.textContent = "−";
+      
+      // Restore green theme
+      root.style.background = "linear-gradient(135deg, #0d1b0e 0%, #1a3a1f 100%)";
+      root.style.border = "2px solid #2ecc71";
+      root.style.boxShadow = "0 8px 32px rgba(0,255,0,.2)";
+      root.style.opacity = "1";
+      headerDiv.style.background = "linear-gradient(90deg, #27ae60 0%, #2ecc71 100%)";
+      headerDiv.style.borderBottom = "2px solid #27ae60";
+      
+      // Restore original title with BETA badge
+      titleH3.innerHTML = '🌲 Ziper <span class="beta-badge">BETA</span>';
+      
       isMinimized = false;
     }
   };
