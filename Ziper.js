@@ -2,10 +2,286 @@
   if(document.getElementById("ziperRoot")) return;
 
   /* ===== CONFIG ===== */
-  const VERSION = "v1.1.0"; // Updated version
+  const VERSION = "v1.2.0"; // Updated version with login system
   const HF_TOKEN = "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"; // Hugging Face API token
   const HF_MODEL = "HuggingFaceTB/SmolLM2-360M-Instruct"; // AI Model
   const AI_ENABLED = true; // Re-enabled with Hugging Face
+  
+  /* ===== ACCOUNT MANAGEMENT SYSTEM ===== */
+  const ACCOUNTS_KEY = "ziperAccounts";
+  const SESSION_KEY = "ziperCurrentUser";
+  const SESSION_TIME_KEY = "ziperSessionTimestamp";
+  const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+
+  // Initialize accounts with admin
+  function initAccounts() {
+    let accounts = JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || "{}");
+    if (!accounts.Sun) {
+      accounts.Sun = {
+        password: "6619",
+        admin: true,
+        created: Date.now(),
+        expires: null
+      };
+      localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+    }
+    return accounts;
+  }
+
+  // Get current session
+  function getCurrentSession() {
+    const username = localStorage.getItem(SESSION_KEY);
+    const timestamp = localStorage.getItem(SESSION_TIME_KEY);
+    
+    if (!username || !timestamp) return null;
+    
+    const now = Date.now();
+    const sessionAge = now - parseInt(timestamp);
+    
+    if (sessionAge > SESSION_DURATION) {
+      logout();
+      return null;
+    }
+    
+    const accounts = initAccounts();
+    const account = accounts[username];
+    
+    if (!account) {
+      logout();
+      return null;
+    }
+    
+    if (account.expires && account.expires < now) {
+      logout();
+      return null;
+    }
+    
+    return { username, account };
+  }
+
+  // Login function
+  function login(username, password) {
+    const accounts = initAccounts();
+    const account = accounts[username];
+    
+    if (!account) return { success: false, error: "Invalid username" };
+    if (account.password !== password) return { success: false, error: "Invalid password" };
+    
+    const now = Date.now();
+    if (account.expires && account.expires < now) {
+      return { success: false, error: "Account expired" };
+    }
+    
+    localStorage.setItem(SESSION_KEY, username);
+    localStorage.setItem(SESSION_TIME_KEY, now.toString());
+    
+    return { success: true };
+  }
+
+  // Logout function
+  function logout() {
+    localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(SESSION_TIME_KEY);
+  }
+
+  // Create account (admin only)
+  function createAccount(username, password, expirationDays, isAdmin = false) {
+    const accounts = initAccounts();
+    
+    if (accounts[username]) {
+      return { success: false, error: "Username already exists" };
+    }
+    
+    if (!/^\d{4}$/.test(password)) {
+      return { success: false, error: "Password must be exactly 4 digits" };
+    }
+    
+    let expires = null;
+    if (expirationDays && expirationDays !== "never") {
+      const days = parseInt(expirationDays);
+      if (days < 1 || days > 365) {
+        return { success: false, error: "Expiration must be 1-365 days" };
+      }
+      expires = Date.now() + (days * 24 * 60 * 60 * 1000);
+    }
+    
+    accounts[username] = {
+      password,
+      admin: isAdmin,
+      created: Date.now(),
+      expires
+    };
+    
+    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+    return { success: true };
+  }
+
+  // Delete account (admin only)
+  function deleteAccount(username) {
+    if (username === "Sun") {
+      return { success: false, error: "Cannot delete admin account" };
+    }
+    
+    const accounts = initAccounts();
+    if (!accounts[username]) {
+      return { success: false, error: "Account not found" };
+    }
+    
+    delete accounts[username];
+    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+    return { success: true };
+  }
+
+  // Get all accounts (admin only)
+  function getAllAccounts() {
+    return initAccounts();
+  }
+
+  // Show login screen
+  function showLoginScreen() {
+    const loginRoot = document.createElement("div");
+    loginRoot.id = "ziperRoot";
+    loginRoot.style = `
+      position:fixed;
+      top:50%;
+      left:50%;
+      transform:translate(-50%, -50%);
+      background:linear-gradient(135deg, #0d1b0e 0%, #1a3a1f 100%);
+      color:#e0ffe0;
+      padding:32px;
+      border-radius:16px;
+      z-index:9999999;
+      width:360px;
+      box-shadow:0 8px 32px rgba(0,255,0,.3);
+      font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+      user-select:none;
+      border:2px solid #2ecc71;
+    `;
+
+    loginRoot.innerHTML = `
+      <style>
+        #ziperRoot *{box-sizing:border-box;}
+        #ziperRoot input {
+          width:100%;
+          padding:12px;
+          margin:8px 0;
+          background:#1a3a1f;
+          border:2px solid #27ae60;
+          border-radius:8px;
+          color:#e0ffe0;
+          font-size:14px;
+          outline:none;
+          transition:all .3s;
+        }
+        #ziperRoot input:focus {
+          border-color:#2ecc71;
+          box-shadow:0 0 8px rgba(46,204,113,.3);
+        }
+        #ziperRoot button {
+          width:100%;
+          padding:12px;
+          margin:8px 0;
+          background:linear-gradient(90deg, #27ae60 0%, #2ecc71 100%);
+          border:none;
+          border-radius:8px;
+          color:#fff;
+          font-size:14px;
+          font-weight:bold;
+          cursor:pointer;
+          transition:all .3s;
+        }
+        #ziperRoot button:hover {
+          transform:translateY(-2px);
+          box-shadow:0 4px 12px rgba(46,204,113,.4);
+        }
+        .login-error {
+          background:#3a1f1f;
+          border:2px solid #e74c3c;
+          color:#ffe0e0;
+          padding:10px;
+          border-radius:8px;
+          margin:8px 0;
+          font-size:13px;
+          display:none;
+        }
+      </style>
+      <div style="text-align:center;margin-bottom:24px;">
+        <h2 style="color:#2ecc71;margin:0 0 8px 0;font-size:28px;">🔐 Ziper Login</h2>
+        <p style="color:#7fb887;margin:0;font-size:14px;">v${VERSION}</p>
+      </div>
+      <div>
+        <label style="color:#2ecc71;font-weight:bold;font-size:14px;">Username</label>
+        <input type="text" id="loginUsername" placeholder="Enter username" autocomplete="off">
+        
+        <label style="color:#2ecc71;font-weight:bold;font-size:14px;margin-top:12px;display:block;">PIN (4 digits)</label>
+        <input type="password" id="loginPassword" placeholder="Enter 4-digit PIN" maxlength="4" pattern="[0-9]*" inputmode="numeric">
+        
+        <div id="loginError" class="login-error"></div>
+        
+        <button id="loginBtn">Login</button>
+      </div>
+    `;
+
+    document.body.appendChild(loginRoot);
+
+    const usernameInput = loginRoot.querySelector("#loginUsername");
+    const passwordInput = loginRoot.querySelector("#loginPassword");
+    const loginBtn = loginRoot.querySelector("#loginBtn");
+    const errorDiv = loginRoot.querySelector("#loginError");
+
+    // Handle login
+    const attemptLogin = () => {
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value.trim();
+
+      if (!username) {
+        errorDiv.textContent = "❌ Please enter username";
+        errorDiv.style.display = "block";
+        return;
+      }
+
+      if (!/^\d{4}$/.test(password)) {
+        errorDiv.textContent = "❌ PIN must be exactly 4 digits";
+        errorDiv.style.display = "block";
+        return;
+      }
+
+      const result = login(username, password);
+      
+      if (result.success) {
+        loginRoot.remove();
+        location.reload(); // Reload to show main app
+      } else {
+        errorDiv.textContent = "❌ " + result.error;
+        errorDiv.style.display = "block";
+        passwordInput.value = "";
+      }
+    };
+
+    loginBtn.onclick = attemptLogin;
+    
+    // Handle Enter key
+    passwordInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") attemptLogin();
+    });
+    usernameInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        passwordInput.focus();
+      }
+    });
+
+    // Focus username on load
+    setTimeout(() => usernameInput.focus(), 100);
+  }
+
+  // Check if session is valid
+  const session = getCurrentSession();
+  
+  // If no valid session, show login screen
+  if (!session) {
+    showLoginScreen();
+    return;
+  }
   
   /* ===== THEME SYSTEM ===== */
   const THEMES = {
@@ -422,13 +698,19 @@
       </div>
       <div class="tab-content" id="settings-tab">
         <div style="color:#7fb887;line-height:1.8;">
-          <p><strong style="color:#2ecc71;">Version:</strong> v1.1.0 RELEASE</p>
+          <p><strong style="color:#2ecc71;">Version:</strong> v1.2.0 RELEASE</p>
           <p><strong style="color:#2ecc71;">API:</strong> Hugging Face AI</p>
           <p><strong style="color:#2ecc71;">Model:</strong> SmolLM2-360M</p>
           <p style="margin-top:12px;font-size:12px;color:#2ecc71;">✅ AI Chat enabled</p>
           <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Custom JS runner</p>
           <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Fun effects & games</p>
           <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Screen filters</p>
+          <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Login system</p>
+          
+          <div style="margin-top:20px;padding-top:16px;border-top:1px solid #27ae60;">
+            <p style="margin-bottom:8px;"><strong style="color:#2ecc71;">👤 User:</strong> <span id="currentUserDisplay"></span></p>
+            <button class="theme-btn" id="logoutBtn" style="background:#c0392b;margin-bottom:12px;">🚪 Logout</button>
+          </div>
           
           <div style="margin-top:20px;padding-top:16px;border-top:1px solid #27ae60;">
             <p style="margin-bottom:12px;"><strong style="color:#2ecc71;">🎨 Theme:</strong></p>
@@ -438,6 +720,26 @@
               <button class="theme-btn" data-theme="purple">👑 Royal Purple</button>
               <button class="theme-btn" data-theme="red">🔥 Fire Red</button>
               <button class="theme-btn" data-theme="orange">🌅 Sunset Orange</button>
+            </div>
+          </div>
+          
+          <div id="adminPanel" style="display:none;">
+            <div style="margin-top:20px;padding-top:16px;border-top:1px solid #27ae60;">
+              <p style="margin-bottom:12px;"><strong style="color:#2ecc71;">👑 Admin Panel</strong></p>
+              
+              <div style="background:#1a3a1f;padding:12px;border-radius:8px;margin-bottom:12px;">
+                <p style="color:#2ecc71;font-weight:bold;font-size:13px;margin-bottom:8px;">Create Account</p>
+                <input type="text" id="newUsername" placeholder="Username" style="width:100%;padding:8px;margin:4px 0;background:#0d1b0e;border:1px solid #27ae60;border-radius:4px;color:#e0ffe0;font-size:12px;">
+                <input type="text" id="newPassword" placeholder="4-digit PIN" maxlength="4" pattern="[0-9]*" inputmode="numeric" style="width:100%;padding:8px;margin:4px 0;background:#0d1b0e;border:1px solid #27ae60;border-radius:4px;color:#e0ffe0;font-size:12px;">
+                <input type="number" id="newExpDays" placeholder="Expiration days (1-365 or leave empty for never)" min="1" max="365" style="width:100%;padding:8px;margin:4px 0;background:#0d1b0e;border:1px solid #27ae60;border-radius:4px;color:#e0ffe0;font-size:12px;">
+                <button id="createAccountBtn" style="width:100%;padding:8px;margin-top:8px;background:#27ae60;border:none;border-radius:4px;color:#fff;cursor:pointer;font-size:12px;">➕ Create Account</button>
+                <div id="createAccountMsg" style="margin-top:8px;font-size:11px;display:none;"></div>
+              </div>
+              
+              <div style="background:#1a3a1f;padding:12px;border-radius:8px;">
+                <p style="color:#2ecc71;font-weight:bold;font-size:13px;margin-bottom:8px;">Accounts</p>
+                <div id="accountsList" style="max-height:200px;overflow-y:auto;"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -643,6 +945,126 @@
   
   // Apply saved theme on load
   applyTheme(currentTheme);
+
+  /* ===== USER SESSION & ADMIN PANEL ===== */
+  // Display current user
+  const currentUserDisplay = root.querySelector("#currentUserDisplay");
+  currentUserDisplay.textContent = session.username + (session.account.admin ? " (Admin)" : "");
+  
+  // Logout handler
+  root.querySelector("#logoutBtn").onclick = () => {
+    if(confirm("Are you sure you want to logout?")) {
+      logout();
+      if(rbInt) clearInterval(rbInt);
+      root.remove();
+      location.reload();
+    }
+  };
+  
+  // Show admin panel if user is admin
+  if(session.account.admin) {
+    const adminPanel = root.querySelector("#adminPanel");
+    adminPanel.style.display = "block";
+    
+    // Format date helper
+    const formatDate = (timestamp) => {
+      if(!timestamp) return "Never";
+      const d = new Date(timestamp);
+      return d.toLocaleDateString() + " " + d.toLocaleTimeString();
+    };
+    
+    // Refresh accounts list
+    const refreshAccountsList = () => {
+      const accounts = getAllAccounts();
+      const accountsList = root.querySelector("#accountsList");
+      const now = Date.now();
+      
+      let html = "";
+      for(const username in accounts) {
+        const acc = accounts[username];
+        const isExpired = acc.expires && acc.expires < now;
+        const status = isExpired ? "❌ Expired" : "✅ Active";
+        const statusColor = isExpired ? "#e74c3c" : "#2ecc71";
+        const canDelete = username !== "Sun";
+        
+        html += `
+          <div style="background:#0d1b0e;padding:10px;margin:6px 0;border-radius:6px;border:1px solid #27ae60;font-size:11px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <strong style="color:#2ecc71;">${username}${acc.admin ? " 👑" : ""}</strong>
+              <span style="color:${statusColor};font-size:10px;">${status}</span>
+            </div>
+            <div style="color:#7fb887;font-size:10px;line-height:1.4;">
+              Created: ${formatDate(acc.created)}<br>
+              Expires: ${formatDate(acc.expires)}
+            </div>
+            ${canDelete ? `<button class="delete-account-btn" data-username="${username}" style="width:100%;padding:6px;margin-top:8px;background:#c0392b;border:none;border-radius:4px;color:#fff;cursor:pointer;font-size:10px;">🗑️ Delete</button>` : ""}
+          </div>
+        `;
+      }
+      
+      accountsList.innerHTML = html || "<p style='color:#7fb887;font-size:11px;text-align:center;'>No accounts</p>";
+      
+      // Add delete handlers
+      accountsList.querySelectorAll(".delete-account-btn").forEach(btn => {
+        btn.onclick = () => {
+          const username = btn.getAttribute("data-username");
+          if(confirm(`Delete account "${username}"?`)) {
+            const result = deleteAccount(username);
+            const msgDiv = root.querySelector("#createAccountMsg");
+            if(result.success) {
+              msgDiv.textContent = "✅ Account deleted";
+              msgDiv.style.color = "#2ecc71";
+              refreshAccountsList();
+            } else {
+              msgDiv.textContent = "❌ " + result.error;
+              msgDiv.style.color = "#e74c3c";
+            }
+            msgDiv.style.display = "block";
+            setTimeout(() => msgDiv.style.display = "none", 3000);
+          }
+        };
+      });
+    };
+    
+    // Create account handler
+    root.querySelector("#createAccountBtn").onclick = () => {
+      const usernameInput = root.querySelector("#newUsername");
+      const passwordInput = root.querySelector("#newPassword");
+      const expDaysInput = root.querySelector("#newExpDays");
+      const msgDiv = root.querySelector("#createAccountMsg");
+      
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value.trim();
+      const expDays = expDaysInput.value.trim() || "never";
+      
+      if(!username) {
+        msgDiv.textContent = "❌ Username required";
+        msgDiv.style.color = "#e74c3c";
+        msgDiv.style.display = "block";
+        return;
+      }
+      
+      const result = createAccount(username, password, expDays);
+      
+      if(result.success) {
+        msgDiv.textContent = "✅ Account created successfully";
+        msgDiv.style.color = "#2ecc71";
+        usernameInput.value = "";
+        passwordInput.value = "";
+        expDaysInput.value = "";
+        refreshAccountsList();
+      } else {
+        msgDiv.textContent = "❌ " + result.error;
+        msgDiv.style.color = "#e74c3c";
+      }
+      
+      msgDiv.style.display = "block";
+      setTimeout(() => msgDiv.style.display = "none", 3000);
+    };
+    
+    // Initial load of accounts
+    refreshAccountsList();
+  }
 
   /* ===== AI CHAT WITH HUGGING FACE ===== */
   root.querySelector("#sendChat").onclick = async () => {
