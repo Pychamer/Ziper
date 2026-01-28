@@ -1,6 +1,6 @@
-# 🌲 Ziper v1.2.1 RELEASE
+# 🌲 Ziper v1.2.1 RELEASE - Universal Accounts
 
-A powerful client-side JavaScript bookmarklet that injects a floating control panel into any webpage. Features include page manipulation tools, AI chat assistance, games, screen effects, custom JavaScript execution, and secure account management with an integrated login system.
+A powerful client-side JavaScript bookmarklet that injects a floating control panel into any webpage. Features include page manipulation tools, AI chat assistance, games, screen effects, custom JavaScript execution, and secure **universal account management** that works across all domains!
 
 ## ✨ Features
 
@@ -49,6 +49,25 @@ A powerful client-side JavaScript bookmarklet that injects a floating control pa
 - **Smart Error Handling** - Clear feedback for all scenarios
 - **30-Second Timeout** - Prevents hanging requests
 
+### 🔐 Universal Account System (NEW in v1.2.1!)
+- **Cross-Domain Accounts** - Create an account once, use it on ALL websites
+- **Secure Login** - 4-digit PIN authentication with session management
+- **Admin Panel** - Create, manage, and delete user accounts (admin only)
+- **Account Expiration** - Set expiration dates (1-365 days) for temporary accounts
+- **Automatic Fallback** - Gracefully falls back to local storage if universal storage unavailable
+- **No Backend Required** - Pure client-side solution using iframe storage hub
+
+**How It Works:**
+- Accounts stored in central storage hub (`storage-hub.html`)
+- All Ziper instances communicate with hub via `postMessage` API
+- Single source of truth for accounts across all domains
+- If you create account "test:1234" on google.com, you can login with it on youtube.com!
+
+**Default Admin Account:**
+- Username: `Sun`
+- Password: `6619`
+- Full admin privileges (create/delete accounts)
+
 ### ⚙️ Theme Customization (NEW!)
 - **5 Color Themes** - Choose from Matrix Green, Ocean Blue, Royal Purple, Fire Red, or Sunset Orange
 - **Persistent Selection** - Your theme choice is saved and restored on reload
@@ -81,6 +100,68 @@ A powerful client-side JavaScript bookmarklet that injects a floating control pa
 2. Go to Console tab
 3. Copy and paste the contents of `Ziper.js`
 4. Press Enter
+
+## 🌐 Universal Account System
+
+Ziper v1.2.1 introduces **universal accounts** that work across all domains!
+
+### How It Works
+
+Ziper uses an iframe-based storage hub to create a single source of truth for accounts:
+
+```
+Your Browser
+├─ google.com (running Ziper)
+│  └─ Communicates with storage hub via postMessage
+├─ youtube.com (running Ziper)
+│  └─ Communicates with storage hub via postMessage
+└─ Storage Hub (iframe)
+   └─ Stores all accounts in one place
+```
+
+**Result:** Create an account on any domain, use it everywhere!
+
+### Setup (For Universal Storage)
+
+**Option 1: GitHub Pages (Recommended)**
+1. Enable GitHub Pages in repository settings
+2. Set source to main branch
+3. Storage hub will be available at: `https://[username].github.io/Ziper/storage-hub.html`
+4. Universal accounts will work automatically!
+
+**Option 2: Self-Hosting**
+1. Host `storage-hub.html` on any web server
+2. Update `STORAGE_HUB_URL` in `Ziper.js` to point to your hosted file
+3. Ensure CORS is properly configured
+
+**Fallback:** If storage hub is unavailable, Ziper automatically falls back to local storage (domain-specific accounts still work).
+
+### Account Management
+
+**Admin Account (Pre-configured):**
+- Username: `Sun`
+- Password: `6619`
+- Cannot be deleted
+- Full admin privileges
+
+**Creating Accounts (Admin Only):**
+1. Login as admin
+2. Go to Settings tab
+3. Scroll to "Account Management" section
+4. Enter username, 4-digit PIN, and optional expiration
+5. Click "Create Account"
+
+**Account Features:**
+- **Usernames:** 1-30 characters, alphanumeric + underscore/dash
+- **Passwords:** Exactly 4 digits (0000-9999)
+- **Expiration:** Set 1-365 days, or "never" for permanent accounts
+- **Admin Status:** Admin accounts can manage other accounts
+
+**Testing Universal Accounts:**
+1. Create account on one domain (e.g., google.com)
+2. Open Ziper on different domain (e.g., youtube.com)
+3. Login with same credentials
+4. ✅ It works universally!
 
 ## 📋 Usage
 
