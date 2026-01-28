@@ -361,7 +361,7 @@
         line-height:1.6;
       }
       #ziperRoot .close-btn{
-        background:var(--theme-primary, #27ae60);
+        background:#27ae60;
         color:#fff;
         border:none;
         padding:8px;
@@ -397,7 +397,7 @@
         font-weight:bold;
       }
       #ziperRoot .minimize-btn{
-        background:var(--theme-primary, #27ae60);
+        background:#27ae60;
         color:#fff;
         border:none;
         padding:8px;
@@ -506,13 +506,13 @@
       </div>
     </div>
     <div class="tabs">
-      <button class="tab active" data-tab="chat">💬 Chat</button>
+      <button class="tab ${session ? 'active' : ''}" data-tab="chat">💬 Chat</button>
       <button class="tab" data-tab="features">🔧 Features</button>
       <button class="tab" data-tab="custom">⚡ Custom</button>
-      <button class="tab" data-tab="settings">⚙️ Settings</button>
+      <button class="tab ${!session ? 'active' : ''}" data-tab="settings">⚙️ Settings</button>
     </div>
     <div class="content">
-      <div class="tab-content active" id="chat-tab">
+      <div class="tab-content ${session ? 'active' : ''}" id="chat-tab">
         <textarea class="chat-input" id="chatInput" placeholder="Ask AI anything..." rows="3"></textarea>
         <button class="send-btn" id="sendChat">🚀 Send Message</button>
         <div id="chatResponse"></div>
@@ -566,7 +566,7 @@
         <button class="run-btn" id="runCustomJS">▶️ Run Custom Code</button>
         <div id="customResponse"></div>
       </div>
-      <div class="tab-content" id="settings-tab">
+      <div class="tab-content ${!session ? 'active' : ''}" id="settings-tab">
         <div style="color:#7fb887;line-height:1.8;">
           <div id="loginSection">
             <!-- Login form will be shown if not logged in, account info if logged in -->
@@ -629,10 +629,28 @@
   
   tabs.forEach(tab => {
     tab.onclick = () => {
+      const targetTab = tab.getAttribute('data-tab');
+      
+      // If not logged in and trying to access non-settings tab, redirect to settings
+      if (!session && targetTab !== 'settings') {
+        tabs.forEach(t => t.classList.remove('active'));
+        tabContents.forEach(tc => tc.classList.remove('active'));
+        root.querySelector('[data-tab="settings"]').classList.add('active');
+        root.querySelector('#settings-tab').classList.add('active');
+        
+        // Show message
+        const loginError = root.querySelector('#loginError');
+        if (loginError) {
+          loginError.textContent = "⚠️ Please login to access this feature";
+          loginError.style.display = "block";
+          setTimeout(() => loginError.style.display = "none", 3000);
+        }
+        return;
+      }
+      
       tabs.forEach(t => t.classList.remove('active'));
       tabContents.forEach(tc => tc.classList.remove('active'));
       tab.classList.add('active');
-      const targetTab = tab.getAttribute('data-tab');
       root.querySelector(`#${targetTab}-tab`).classList.add('active');
     };
   });
