@@ -1,20 +1,133 @@
-(function(){
+(async function(){
   if(document.getElementById("ziperRoot")) return;
 
   /* ===== CONFIG ===== */
-  const VERSION = "v1.2.0"; // Updated version with login system
+  const VERSION = "v1.2.1"; // Updated version with universal account storage
   const HF_TOKEN = "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"; // Hugging Face API token
   const HF_MODEL = "HuggingFaceTB/SmolLM2-360M-Instruct"; // AI Model
   const AI_ENABLED = true; // Re-enabled with Hugging Face
+  const STORAGE_HUB_URL = "https://pychamer.github.io/Ziper/storage-hub.html"; // Universal storage hub
+  
+  /* ===== UNIVERSAL STORAGE SYSTEM ===== */
+  // This system allows accounts to work across all domains by using an iframe
+  // that acts as a central storage hub
+  
+  let storageHub = null;
+  let hubReady = false;
+  let pendingRequests = new Map();
+  let requestCounter = 0;
+  
+  function initStorageHub() {
+    return new Promise((resolve) => {
+      // Create hidden iframe for storage hub
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = STORAGE_HUB_URL;
+      iframe.id = 'ziperStorageHub';
+      
+      // Listen for messages from the hub
+      window.addEventListener('message', (event) => {
+        if (event.source !== iframe.contentWindow) return;
+        
+        const { type, requestId, data, success, error } = event.data;
+        
+        if (type === 'PONG') {
+          hubReady = true;
+          resolve(iframe);
+          return;
+        }
+        
+        const pending = pendingRequests.get(requestId);
+        if (pending) {
+          pendingRequests.delete(requestId);
+          
+          if (type === 'ERROR') {
+            pending.reject(new Error(error || 'Storage hub error'));
+          } else {
+            pending.resolve({ data, success });
+          }
+        }
+      });
+      
+      // Send ping after iframe loads
+      iframe.onload = () => {
+        setTimeout(() => {
+          iframe.contentWindow.postMessage({ type: 'PING', requestId: 0 }, '*');
+          
+          // Fallback timeout
+          setTimeout(() => {
+            if (!hubReady) {
+              console.warn('Storage hub timeout - using local storage');
+              resolve(null);
+            }
+          }, 3000);
+        }, 100);
+      };
+      
+      document.body.appendChild(iframe);
+      storageHub = iframe;
+    });
+  }
+  
+  function sendToHub(type, data = null) {
+    return new Promise((resolve, reject) => {
+      if (!storageHub || !hubReady) {
+        reject(new Error('Storage hub not ready'));
+        return;
+      }
+      
+      const requestId = ++requestCounter;
+      pendingRequests.set(requestId, { resolve, reject });
+      
+      storageHub.contentWindow.postMessage({
+        type,
+        data,
+        requestId
+      }, '*');
+      
+      // Timeout after 5 seconds
+      setTimeout(() => {
+        if (pendingRequests.has(requestId)) {
+          pendingRequests.delete(requestId);
+          reject(new Error('Request timeout'));
+        }
+      }, 5000);
+    });
+  }
   
   /* ===== ACCOUNT MANAGEMENT SYSTEM ===== */
   const ACCOUNTS_KEY = "ziperAccounts";
   const SESSION_KEY = "ziperCurrentUser";
   const SESSION_TIME_KEY = "ziperSessionTimestamp";
   const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+  let useUniversalStorage = true; // Try to use universal storage
 
-  // Initialize accounts with admin
-  function initAccounts() {
+  // Initialize accounts with admin - now supports universal storage
+  async function initAccounts() {
+    try {
+      if (useUniversalStorage && hubReady) {
+        const response = await sendToHub('GET_ACCOUNTS');
+        let accounts = response.data || {};
+        
+        // Ensure admin account exists
+        if (!accounts.Sun) {
+          accounts.Sun = {
+            password: "6619",
+            admin: true,
+            created: Date.now(),
+            expires: null
+          };
+          await sendToHub('SAVE_ACCOUNTS', accounts);
+        }
+        
+        return accounts;
+      }
+    } catch (e) {
+      console.warn('Universal storage failed, using local:', e);
+      useUniversalStorage = false;
+    }
+    
+    // Fallback to local storage
     let accounts = JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || "{}");
     if (!accounts.Sun) {
       accounts.Sun = {
@@ -27,131 +140,181 @@
     }
     return accounts;
   }
-
-  // Get current session
-  function getCurrentSession() {
-    const username = localStorage.getItem(SESSION_KEY);
-    const timestamp = localStorage.getItem(SESSION_TIME_KEY);
-    
-    if (!username || !timestamp) return null;
-    
-    const now = Date.now();
-    const sessionAge = now - parseInt(timestamp);
-    
-    if (sessionAge > SESSION_DURATION) {
-      logout();
-      return null;
-    }
-    
-    const accounts = initAccounts();
-    const account = accounts[username];
-    
-    if (!account) {
-      logout();
-      return null;
-    }
-    
-    if (account.expires && account.expires < now) {
-      logout();
-      return null;
-    }
-    
-    return { username, account };
-  }
-
-  // Login function
-  function login(username, password) {
-    const accounts = initAccounts();
-    const account = accounts[username];
-    
-    if (!account) return { success: false, error: "Invalid username" };
-    if (account.password !== password) return { success: false, error: "Invalid password" };
-    
-    const now = Date.now();
-    if (account.expires && account.expires < now) {
-      return { success: false, error: "Account expired" };
-    }
-    
-    localStorage.setItem(SESSION_KEY, username);
-    localStorage.setItem(SESSION_TIME_KEY, now.toString());
-    
-    return { success: true };
-  }
-
-  // Logout function
-  function logout() {
-    localStorage.removeItem(SESSION_KEY);
-    localStorage.removeItem(SESSION_TIME_KEY);
-  }
-
-  // Create account (admin only)
-  function createAccount(username, password, expirationDays, isAdmin = false) {
-    const accounts = initAccounts();
-    
-    // Validate username
-    username = username.trim();
-    if (!username || username.length > 30) {
-      return { success: false, error: "Username must be 1-30 characters" };
-    }
-    if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
-      return { success: false, error: "Username can only contain letters, numbers, _ and -" };
-    }
-    
-    if (accounts[username]) {
-      return { success: false, error: "Username already exists" };
-    }
-    
-    if (!/^\d{4}$/.test(password)) {
-      return { success: false, error: "Password must be exactly 4 digits" };
-    }
-    
-    let expires = null;
-    if (expirationDays && expirationDays !== "never") {
-      const days = parseInt(expirationDays);
-      if (isNaN(days) || days < 1 || days > 365) {
-        return { success: false, error: "Expiration must be 1-365 days" };
-      }
-      expires = Date.now() + (days * 24 * 60 * 60 * 1000);
-    }
-    
-    accounts[username] = {
-      password,
-      admin: isAdmin,
-      created: Date.now(),
-      expires
-    };
-    
+  
+  // Save accounts to storage
+  async function saveAccounts(accounts) {
     try {
-      localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
-    } catch(e) {
+      if (useUniversalStorage && hubReady) {
+        await sendToHub('SAVE_ACCOUNTS', accounts);
+        return;
+      }
+    } catch (e) {
+      console.warn('Universal storage save failed, using local:', e);
+      useUniversalStorage = false;
+    }
+    
+    // Fallback to local storage
+    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+  }
+
+  // Get current session - now supports universal storage
+  async function getCurrentSession() {
+    try {
+      let username, timestamp;
+      
+      if (useUniversalStorage && hubReady) {
+        const userResponse = await sendToHub('GET_CURRENT_USER');
+        username = userResponse.data;
+        // For session timestamp, still use local storage as it's session-specific
+        timestamp = localStorage.getItem(SESSION_TIME_KEY);
+      } else {
+        username = localStorage.getItem(SESSION_KEY);
+        timestamp = localStorage.getItem(SESSION_TIME_KEY);
+      }
+      
+      if (!username || !timestamp) return null;
+      
+      const now = Date.now();
+      const sessionAge = now - parseInt(timestamp);
+      
+      if (sessionAge > SESSION_DURATION) {
+        await logout();
+        return null;
+      }
+      
+      const accounts = await initAccounts();
+      const account = accounts[username];
+      
+      if (!account) {
+        await logout();
+        return null;
+      }
+      
+      if (account.expires && account.expires < now) {
+        await logout();
+        return null;
+      }
+      
+      return { username, account };
+    } catch (e) {
+      console.error('Session check error:', e);
+      return null;
+    }
+  }
+
+  // Login function - now supports universal storage
+  async function login(username, password) {
+    try {
+      const accounts = await initAccounts();
+      const account = accounts[username];
+      
+      if (!account) return { success: false, error: "Invalid username" };
+      if (account.password !== password) return { success: false, error: "Invalid password" };
+      
+      const now = Date.now();
+      if (account.expires && account.expires < now) {
+        return { success: false, error: "Account expired" };
+      }
+      
+      // Save session
+      if (useUniversalStorage && hubReady) {
+        await sendToHub('SET_CURRENT_USER', username);
+      } else {
+        localStorage.setItem(SESSION_KEY, username);
+      }
+      localStorage.setItem(SESSION_TIME_KEY, now.toString());
+      
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  }
+
+  // Logout function - now supports universal storage
+  async function logout() {
+    try {
+      if (useUniversalStorage && hubReady) {
+        await sendToHub('SET_CURRENT_USER', null);
+      } else {
+        localStorage.removeItem(SESSION_KEY);
+      }
+      localStorage.removeItem(SESSION_TIME_KEY);
+    } catch (e) {
+      // Fallback
+      localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(SESSION_TIME_KEY);
+    }
+  }
+
+  // Create account (admin only) - now supports universal storage
+  async function createAccount(username, password, expirationDays, isAdmin = false) {
+    try {
+      const accounts = await initAccounts();
+      
+      // Validate username
+      username = username.trim();
+      if (!username || username.length > 30) {
+        return { success: false, error: "Username must be 1-30 characters" };
+      }
+      if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+        return { success: false, error: "Username can only contain letters, numbers, _ and -" };
+      }
+      
+      if (accounts[username]) {
+        return { success: false, error: "Username already exists" };
+      }
+      
+      if (!/^\d{4}$/.test(password)) {
+        return { success: false, error: "Password must be exactly 4 digits" };
+      }
+      
+      let expires = null;
+      if (expirationDays && expirationDays !== "never") {
+        const days = parseInt(expirationDays);
+        if (isNaN(days) || days < 1 || days > 365) {
+          return { success: false, error: "Expiration must be 1-365 days" };
+        }
+        expires = Date.now() + (days * 24 * 60 * 60 * 1000);
+      }
+      
+      accounts[username] = {
+        password,
+        admin: isAdmin,
+        created: Date.now(),
+        expires
+      };
+      
+      await saveAccounts(accounts);
+      return { success: true };
+    } catch (e) {
       return { success: false, error: "Storage error: " + e.message };
     }
-    return { success: true };
   }
 
-  // Delete account (admin only)
-  function deleteAccount(username) {
-    if (username === "Sun") {
-      return { success: false, error: "Cannot delete admin account" };
+  // Delete account (admin only) - now supports universal storage
+  async function deleteAccount(username) {
+    try {
+      if (username === "Sun") {
+        return { success: false, error: "Cannot delete admin account" };
+      }
+      
+      const accounts = await initAccounts();
+      if (!accounts[username]) {
+        return { success: false, error: "Account not found" };
+      }
+      
+      delete accounts[username];
+      await saveAccounts(accounts);
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: e.message };
     }
-    
-    const accounts = initAccounts();
-    if (!accounts[username]) {
-      return { success: false, error: "Account not found" };
-    }
-    
-    delete accounts[username];
-    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
-    return { success: true };
   }
 
-  // Get all accounts (admin only)
-  function getAllAccounts() {
-    return initAccounts();
+  // Get all accounts (admin only) - now supports universal storage
+  async function getAllAccounts() {
+    return await initAccounts();
   }
-
-  // Check if session is valid
-  const session = getCurrentSession();
   
   /* ===== THEME SYSTEM ===== */
   const THEMES = {
@@ -620,21 +783,35 @@
 
   document.body.appendChild(root);
 
-  /* ===== SHARED STATE ===== */
-  let rbInt = null; // Rainbow mode interval
+  // Async initialization function
+  (async function initZiper() {
+    // Initialize storage hub
+    try {
+      await initStorageHub();
+      console.log('Ziper: Universal storage initialized');
+    } catch (e) {
+      console.warn('Ziper: Using local storage only');
+      useUniversalStorage = false;
+    }
 
-  /* ===== TAB SWITCHING ===== */
-  const tabs = root.querySelectorAll('.tab');
-  const tabContents = root.querySelectorAll('.tab-content');
-  
-  tabs.forEach(tab => {
-    tab.onclick = () => {
-      const targetTab = tab.getAttribute('data-tab');
-      
-      // If not logged in and trying to access non-settings tab, redirect to settings
-      if (!session && targetTab !== 'settings') {
-        tabs.forEach(t => t.classList.remove('active'));
-        tabContents.forEach(tc => tc.classList.remove('active'));
+    // Check session
+    const session = await getCurrentSession();
+
+    /* ===== SHARED STATE ===== */
+    let rbInt = null; // Rainbow mode interval
+
+    /* ===== TAB SWITCHING ===== */
+    const tabs = root.querySelectorAll('.tab');
+    const tabContents = root.querySelectorAll('.tab-content');
+    
+    tabs.forEach(tab => {
+      tab.onclick = () => {
+        const targetTab = tab.getAttribute('data-tab');
+        
+        // If not logged in and trying to access non-settings tab, redirect to settings
+        if (!session && targetTab !== 'settings') {
+          tabs.forEach(t => t.classList.remove('active'));
+          tabContents.forEach(tc => tc.classList.remove('active'));
         root.querySelector('[data-tab="settings"]').classList.add('active');
         root.querySelector('#settings-tab').classList.add('active');
         
@@ -854,9 +1031,9 @@
     `;
     
     // Logout handler
-    root.querySelector("#logoutBtn").onclick = () => {
+    root.querySelector("#logoutBtn").onclick = async () => {
       if(confirm("Are you sure you want to logout?")) {
-        logout();
+        await logout();
         if(rbInt) clearInterval(rbInt);
         root.remove();
         location.reload();
@@ -880,7 +1057,7 @@
     const errorDiv = root.querySelector("#loginError");
     
     // Handle login
-    const attemptLogin = () => {
+    const attemptLogin = async () => {
       const username = usernameInput.value.trim();
       const password = passwordInput.value.trim();
       
@@ -896,7 +1073,7 @@
         return;
       }
       
-      const result = login(username, password);
+      const result = await login(username, password);
       
       if (result.success) {
         location.reload();
@@ -955,8 +1132,8 @@
     };
     
     // Refresh accounts list
-    const refreshAccountsList = () => {
-      const accounts = getAllAccounts();
+    const refreshAccountsList = async () => {
+      const accounts = await getAllAccounts();
       const accountsList = root.querySelector("#accountsList");
       const now = Date.now();
       
@@ -988,10 +1165,10 @@
       
       // Add delete handlers
       accountsList.querySelectorAll(".delete-account-btn").forEach(btn => {
-        btn.onclick = () => {
+        btn.onclick = async () => {
           const username = btn.getAttribute("data-username");
           if(confirm(`Delete account "${username}"?`)) {
-            const result = deleteAccount(username);
+            const result = await deleteAccount(username);
             const msgDiv = root.querySelector("#createAccountMsg");
             if(result.success) {
               showMessage(msgDiv, "✅ Account deleted", false);
@@ -1013,7 +1190,7 @@
       e.target.value = e.target.value.replace(/[^0-9]/g, '');
     });
     
-    root.querySelector("#createAccountBtn").onclick = () => {
+    root.querySelector("#createAccountBtn").onclick = async () => {
       const usernameInput = root.querySelector("#newUsername");
       const passwordInput = root.querySelector("#newPassword");
       const expDaysInput = root.querySelector("#newExpDays");
@@ -1028,7 +1205,7 @@
         return;
       }
       
-      const result = createAccount(username, password, expDays);
+      const result = await createAccount(username, password, expDays);
       
       if(result.success) {
         showMessage(msgDiv, "✅ Account created successfully", false);
@@ -1899,5 +2076,7 @@
       responseDiv.innerHTML = '<div class="chat-response" style="border-left-color:#e74c3c;">❌ Error:<br>' + escapeHtml(e.message) + '</div>';
     }
   };
+  
+  })(); // End of async initZiper
 
-})();
+})(); // End of main IIFE
