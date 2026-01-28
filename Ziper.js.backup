@@ -150,8 +150,156 @@
     return initAccounts();
   }
 
+  // Show login screen
+  function showLoginScreen() {
+    const loginRoot = document.createElement("div");
+    loginRoot.id = "ziperRoot";
+    loginRoot.style = `
+      position:fixed;
+      top:50%;
+      left:50%;
+      transform:translate(-50%, -50%);
+      background:linear-gradient(135deg, #0d1b0e 0%, #1a3a1f 100%);
+      color:#e0ffe0;
+      padding:32px;
+      border-radius:16px;
+      z-index:9999999;
+      width:360px;
+      box-shadow:0 8px 32px rgba(0,255,0,.3);
+      font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+      user-select:none;
+      border:2px solid #2ecc71;
+    `;
+
+    loginRoot.innerHTML = `
+      <style>
+        #ziperRoot *{box-sizing:border-box;}
+        #ziperRoot input {
+          width:100%;
+          padding:12px;
+          margin:8px 0;
+          background:#1a3a1f;
+          border:2px solid #27ae60;
+          border-radius:8px;
+          color:#e0ffe0;
+          font-size:14px;
+          outline:none;
+          transition:all .3s;
+        }
+        #ziperRoot input:focus {
+          border-color:#2ecc71;
+          box-shadow:0 0 8px rgba(46,204,113,.3);
+        }
+        #ziperRoot button {
+          width:100%;
+          padding:12px;
+          margin:8px 0;
+          background:linear-gradient(90deg, #27ae60 0%, #2ecc71 100%);
+          border:none;
+          border-radius:8px;
+          color:#fff;
+          font-size:14px;
+          font-weight:bold;
+          cursor:pointer;
+          transition:all .3s;
+        }
+        #ziperRoot button:hover {
+          transform:translateY(-2px);
+          box-shadow:0 4px 12px rgba(46,204,113,.4);
+        }
+        .login-error {
+          background:#3a1f1f;
+          border:2px solid #e74c3c;
+          color:#ffe0e0;
+          padding:10px;
+          border-radius:8px;
+          margin:8px 0;
+          font-size:13px;
+          display:none;
+        }
+      </style>
+      <div style="text-align:center;margin-bottom:24px;">
+        <h2 style="color:#2ecc71;margin:0 0 8px 0;font-size:28px;">🔐 Ziper Login</h2>
+        <p style="color:#7fb887;margin:0;font-size:14px;">v${VERSION}</p>
+      </div>
+      <div>
+        <label for="loginUsername" style="color:#2ecc71;font-weight:bold;font-size:14px;">Username</label>
+        <input type="text" id="loginUsername" placeholder="Enter username" autocomplete="off">
+        
+        <label for="loginPassword" style="color:#2ecc71;font-weight:bold;font-size:14px;margin-top:12px;display:block;">PIN (4 digits)</label>
+        <input type="password" id="loginPassword" placeholder="Enter 4-digit PIN" maxlength="4" pattern="[0-9]*" inputmode="numeric">
+        
+        <div id="loginError" class="login-error" role="alert" aria-live="polite"></div>
+        
+        <button id="loginBtn">Login</button>
+      </div>
+    `;
+
+    document.body.appendChild(loginRoot);
+
+    const usernameInput = loginRoot.querySelector("#loginUsername");
+    const passwordInput = loginRoot.querySelector("#loginPassword");
+    const loginBtn = loginRoot.querySelector("#loginBtn");
+    const errorDiv = loginRoot.querySelector("#loginError");
+
+    // Handle login
+    const attemptLogin = () => {
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value.trim();
+
+      if (!username) {
+        errorDiv.textContent = "❌ Please enter username";
+        errorDiv.style.display = "block";
+        return;
+      }
+
+      if (!/^\d{4}$/.test(password)) {
+        errorDiv.textContent = "❌ PIN must be exactly 4 digits";
+        errorDiv.style.display = "block";
+        return;
+      }
+
+      const result = login(username, password);
+      
+      if (result.success) {
+        loginRoot.remove();
+        location.reload(); // Reload to show main app
+      } else {
+        errorDiv.textContent = "❌ " + result.error;
+        errorDiv.style.display = "block";
+        passwordInput.value = "";
+      }
+    };
+
+    loginBtn.onclick = attemptLogin;
+    
+    // Filter non-numeric input in PIN field
+    passwordInput.addEventListener("input", (e) => {
+      e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    });
+    
+    // Handle Enter key
+    passwordInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") attemptLogin();
+    });
+    usernameInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        passwordInput.focus();
+      }
+    });
+
+    // Focus username on load
+    setTimeout(() => usernameInput.focus(), 100);
+  }
+
   // Check if session is valid
   const session = getCurrentSession();
+  
+  // If no valid session, show login screen
+  if (!session) {
+    showLoginScreen();
+    return;
+  }
   
   /* ===== THEME SYSTEM ===== */
   const THEMES = {
@@ -291,7 +439,7 @@
       }
       #ziperRoot .content{
         padding:16px;
-        height:320px;
+        max-height:400px;
         overflow-y:auto;
       }
       #ziperRoot .content::-webkit-scrollbar{width:8px;}
@@ -361,17 +509,17 @@
         line-height:1.6;
       }
       #ziperRoot .close-btn{
-        background:var(--theme-primary, #27ae60);
+        background:#e74c3c;
         color:#fff;
         border:none;
-        padding:8px;
+        padding:6px 12px;
         border-radius:6px;
         cursor:pointer;
-        font-size:14px;
+        font-size:12px;
         font-weight:bold;
       }
       #ziperRoot .close-btn:hover{
-        opacity:0.85;
+        background:#c0392b;
       }
       #ziperRoot .theme-btn{
         width:100%;
@@ -397,18 +545,18 @@
         font-weight:bold;
       }
       #ziperRoot .minimize-btn{
-        background:var(--theme-primary, #27ae60);
+        background:#f39c12;
         color:#fff;
         border:none;
-        padding:8px;
+        padding:6px 12px;
         border-radius:6px;
         cursor:pointer;
-        font-size:14px;
+        font-size:16px;
         font-weight:bold;
         margin-right:8px;
       }
       #ziperRoot .minimize-btn:hover{
-        opacity:0.85;
+        background:#e67e22;
       }
       #ziperRoot .header > div{
         display:flex;
@@ -568,22 +716,21 @@
       </div>
       <div class="tab-content" id="settings-tab">
         <div style="color:#7fb887;line-height:1.8;">
-          <div id="loginSection">
-            <!-- Login form will be shown if not logged in, account info if logged in -->
+          <p><strong style="color:#2ecc71;">Version:</strong> v1.2.0 RELEASE</p>
+          <p><strong style="color:#2ecc71;">API:</strong> Hugging Face AI</p>
+          <p><strong style="color:#2ecc71;">Model:</strong> SmolLM2-360M</p>
+          <p style="margin-top:12px;font-size:12px;color:#2ecc71;">✅ AI Chat enabled</p>
+          <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Custom JS runner</p>
+          <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Fun effects & games</p>
+          <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Screen filters</p>
+          <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Login system</p>
+          
+          <div style="margin-top:20px;padding-top:16px;border-top:1px solid #27ae60;">
+            <p style="margin-bottom:8px;"><strong style="color:#2ecc71;">👤 User:</strong> <span id="currentUserDisplay"></span></p>
+            <button class="theme-btn" id="logoutBtn" style="background:#c0392b;margin-bottom:12px;">🚪 Logout</button>
           </div>
           
-          <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #27ae60;">
-            <p><strong style="color:#2ecc71;">Version:</strong> v1.2.0 RELEASE</p>
-            <p><strong style="color:#2ecc71;">API:</strong> Hugging Face AI</p>
-            <p><strong style="color:#2ecc71;">Model:</strong> SmolLM2-360M</p>
-            <p style="margin-top:12px;font-size:12px;color:#2ecc71;">✅ AI Chat enabled</p>
-            <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Custom JS runner</p>
-            <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Fun effects & games</p>
-            <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Screen filters</p>
-            <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Login system</p>
-          </div>
-          
-          <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #27ae60;">
+          <div style="margin-top:20px;padding-top:16px;border-top:1px solid #27ae60;">
             <p style="margin-bottom:12px;"><strong style="color:#2ecc71;">🎨 Theme:</strong></p>
             <div id="themeSelector" style="display:flex;flex-direction:column;gap:8px;">
               <button class="theme-btn" data-theme="green">🌲 Matrix Green</button>
@@ -595,7 +742,7 @@
           </div>
           
           <div id="adminPanel" style="display:none;">
-            <div style="padding-top:16px;border-top:1px solid #27ae60;">
+            <div style="margin-top:20px;padding-top:16px;border-top:1px solid #27ae60;">
               <p style="margin-bottom:12px;"><strong style="color:#2ecc71;">👑 Admin Panel</strong></p>
               
               <div style="background:#1a3a1f;padding:12px;border-radius:8px;margin-bottom:12px;">
@@ -719,11 +866,11 @@
       
       // Restore button colors and sizes
       minimizeBtn.style.background = theme.primary;
-      minimizeBtn.style.padding = "8px";
-      minimizeBtn.style.fontSize = "14px";
-      closeBtn.style.background = theme.primary;
-      closeBtn.style.padding = "8px";
-      closeBtn.style.fontSize = "14px";
+      minimizeBtn.style.padding = "6px 12px";
+      minimizeBtn.style.fontSize = "16px";
+      closeBtn.style.background = "#e74c3c";
+      closeBtn.style.padding = "6px 12px";
+      closeBtn.style.fontSize = "12px";
       
       // Restore original title with BETA badge
       titleH3.innerHTML = '🌲 Ziper <span class="beta-badge">BETA</span>';
@@ -797,15 +944,11 @@
       }
     });
     
-    // Update minimize and close button colors to match theme (only when not minimized)
+    // Update minimize button color to match theme (only when not minimized)
     if(!isMinimized) {
       const minimizeBtn = root.querySelector("#minimizeWidget");
-      const closeBtn = root.querySelector("#closeWidget");
       if(minimizeBtn) {
         minimizeBtn.style.background = theme.primary;
-      }
-      if(closeBtn) {
-        closeBtn.style.background = theme.primary;
       }
     }
   };
@@ -822,91 +965,22 @@
   applyTheme(currentTheme);
 
   /* ===== USER SESSION & ADMIN PANEL ===== */
-  // Render login section based on session state
-  const loginSection = root.querySelector("#loginSection");
+  // Display current user
+  const currentUserDisplay = root.querySelector("#currentUserDisplay");
+  currentUserDisplay.textContent = session.username + (session.account.admin ? " (Admin)" : "");
   
-  if (session) {
-    // User is logged in - show account info
-    loginSection.innerHTML = `
-      <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #27ae60;">
-        <p style="margin-bottom:12px;"><strong style="color:#2ecc71;">🔐 Account</strong></p>
-        <p style="margin-bottom:8px;"><strong style="color:#2ecc71;">👤 Logged in as:</strong> <span id="currentUserDisplay">${session.username}${session.account.admin ? " (Admin)" : ""}</span></p>
-        <button class="theme-btn" id="logoutBtn" style="background:#c0392b;">🚪 Logout</button>
-      </div>
-    `;
-    
-    // Logout handler
-    root.querySelector("#logoutBtn").onclick = () => {
-      if(confirm("Are you sure you want to logout?")) {
-        logout();
-        if(rbInt) clearInterval(rbInt);
-        root.remove();
-        location.reload();
-      }
-    };
-  } else {
-    // User is not logged in - show login form
-    loginSection.innerHTML = `
-      <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #27ae60;">
-        <p style="margin-bottom:12px;"><strong style="color:#2ecc71;">🔐 Login</strong></p>
-        <input type="text" id="loginUsername" placeholder="Username" autocomplete="off" style="width:100%;padding:10px;margin:6px 0;background:#1a3a1f;border:2px solid #27ae60;border-radius:6px;color:#e0ffe0;font-size:13px;">
-        <input type="password" id="loginPassword" placeholder="4-digit PIN" maxlength="4" pattern="[0-9]*" inputmode="numeric" style="width:100%;padding:10px;margin:6px 0;background:#1a3a1f;border:2px solid #27ae60;border-radius:6px;color:#e0ffe0;font-size:13px;">
-        <div id="loginError" style="background:#3a1f1f;border:2px solid #e74c3c;color:#ffe0e0;padding:8px;border-radius:6px;margin:6px 0;font-size:12px;display:none;"></div>
-        <button id="loginBtn" style="width:100%;padding:10px;margin-top:6px;background:linear-gradient(90deg, #27ae60 0%, #2ecc71 100%);border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:bold;cursor:pointer;">🔐 Login</button>
-      </div>
-    `;
-    
-    const usernameInput = root.querySelector("#loginUsername");
-    const passwordInput = root.querySelector("#loginPassword");
-    const loginBtn = root.querySelector("#loginBtn");
-    const errorDiv = root.querySelector("#loginError");
-    
-    // Handle login
-    const attemptLogin = () => {
-      const username = usernameInput.value.trim();
-      const password = passwordInput.value.trim();
-      
-      if (!username) {
-        errorDiv.textContent = "❌ Please enter username";
-        errorDiv.style.display = "block";
-        return;
-      }
-      
-      if (!/^\d{4}$/.test(password)) {
-        errorDiv.textContent = "❌ PIN must be exactly 4 digits";
-        errorDiv.style.display = "block";
-        return;
-      }
-      
-      const result = login(username, password);
-      
-      if (result.success) {
-        location.reload();
-      } else {
-        errorDiv.textContent = "❌ " + result.error;
-        errorDiv.style.display = "block";
-        passwordInput.value = "";
-      }
-    };
-    
-    loginBtn.onclick = attemptLogin;
-    
-    // Filter non-numeric input in PIN field
-    passwordInput.addEventListener("input", (e) => {
-      e.target.value = e.target.value.replace(/[^0-9]/g, '');
-    });
-    
-    // Handle Enter key
-    passwordInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") attemptLogin();
-    });
-    usernameInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") passwordInput.focus();
-    });
-  }
+  // Logout handler
+  root.querySelector("#logoutBtn").onclick = () => {
+    if(confirm("Are you sure you want to logout?")) {
+      logout();
+      if(rbInt) clearInterval(rbInt);
+      root.remove();
+      location.reload();
+    }
+  };
   
   // Show admin panel if user is admin
-  if(session && session.account.admin) {
+  if(session.account.admin) {
     const adminPanel = root.querySelector("#adminPanel");
     adminPanel.style.display = "block";
     
