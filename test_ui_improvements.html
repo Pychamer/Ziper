@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ziper UI Test - Login Integration & Button Fixes</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 40px;
+      color: #fff;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .info-box {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 30px;
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+    .info-box h2 {
+      margin-top: 0;
+      color: #fff;
+    }
+    .info-box ul {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+    .info-box li {
+      margin: 8px 0;
+    }
+    .highlight {
+      background: rgba(46, 204, 113, 0.2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .test-credentials {
+      background: rgba(0,0,0,0.3);
+      padding: 16px;
+      border-radius: 8px;
+      margin: 16px 0;
+      font-family: monospace;
+    }
+    .test-credentials strong {
+      color: #2ecc71;
+    }
+    .instructions {
+      background: rgba(243, 156, 18, 0.2);
+      border: 2px solid rgba(243, 156, 18, 0.5);
+      padding: 16px;
+      border-radius: 8px;
+      margin: 16px 0;
+    }
+    .load-btn {
+      display: block;
+      width: 100%;
+      max-width: 300px;
+      margin: 20px auto;
+      padding: 16px 32px;
+      background: linear-gradient(90deg, #27ae60 0%, #2ecc71 100%);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+      transition: all 0.3s;
+    }
+    .load-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(46, 204, 113, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 Ziper UI Improvements Test</h1>
+    
+    <div class="info-box">
+      <h2>✅ UI Fixes Implemented</h2>
+      <ul>
+        <li><span class="highlight">Fixed Header Buttons:</span> Both minimize (−) and close (✕) buttons now have same size (14px font, 8px padding) and use theme colors instead of orange/red</li>
+        <li><span class="highlight">Fixed Content Height:</span> Changed from <code>max-height: 400px</code> to <code>height: 320px</code> - menu no longer resizes when switching tabs</li>
+        <li><span class="highlight">Login Integration:</span> Login system moved from full-screen modal to Settings tab for cleaner UX</li>
+        <li><span class="highlight">Professional Look:</span> Removed AI-generated appearance with consistent, polished styling</li>
+      </ul>
+    </div>
+
+    <div class="info-box">
+      <h2>🧪 Testing Instructions</h2>
+      <div class="instructions">
+        <strong>1. Load Ziper Widget</strong>
+        <p>Click the button below to load Ziper in the bottom-right corner</p>
+      </div>
+      
+      <button class="load-btn" onclick="loadZiper()">🚀 Load Ziper Widget</button>
+      
+      <div class="instructions">
+        <strong>2. Test Login (now in Settings tab)</strong>
+        <div class="test-credentials">
+          <strong>Admin Account:</strong><br>
+          Username: <span style="color: #3498db">Sun</span><br>
+          Password: <span style="color: #3498db">6619</span>
+        </div>
+        <p>The widget will open on Settings tab where you can log in. No more full-screen modal!</p>
+      </div>
+      
+      <div class="instructions">
+        <strong>3. Check Button Styling</strong>
+        <ul>
+          <li>Look at the minimize (−) and close (✕) buttons in the header</li>
+          <li>They should be the same size and color now</li>
+          <li>No more orange/red mismatch</li>
+          <li>They should match your current theme</li>
+        </ul>
+      </div>
+      
+      <div class="instructions">
+        <strong>4. Test Fixed Height</strong>
+        <ul>
+          <li>Switch between tabs (Chat, Features, Custom, Settings)</li>
+          <li>The widget size should stay constant</li>
+          <li>Content scrolls within the fixed area</li>
+        </ul>
+      </div>
+      
+      <div class="instructions">
+        <strong>5. Try Theme Changes</strong>
+        <ul>
+          <li>After logging in, go to Settings tab</li>
+          <li>Try different themes (Green, Blue, Purple, Red, Orange)</li>
+          <li>Notice how buttons now match the theme color</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <h2>🎯 Expected Behavior</h2>
+      <ul>
+        <li>Widget appears in bottom-right with Settings tab active</li>
+        <li>Login form is integrated into Settings (not a separate modal)</li>
+        <li>After login, you can access all tabs</li>
+        <li>Buttons are uniform and professional-looking</li>
+        <li>Widget maintains fixed size across all tabs</li>
+        <li>Smooth scrolling within content area</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    function loadZiper() {
+      if (document.getElementById('ziperRoot')) {
+        alert('Ziper is already loaded! Check the bottom-right corner.');
+        return;
+      }
+      
+      const script = document.createElement('script');
+      script.src = 'Ziper.js';
+      script.onload = () => {
+        console.log('✅ Ziper loaded successfully!');
+      };
+      script.onerror = () => {
+        alert('❌ Error loading Ziper.js');
+      };
+      document.body.appendChild(script);
+    }
+  </script>
+</body>
+</html>
