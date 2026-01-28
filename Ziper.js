@@ -88,6 +88,15 @@
   function createAccount(username, password, expirationDays, isAdmin = false) {
     const accounts = initAccounts();
     
+    // Validate username
+    username = username.trim();
+    if (!username || username.length > 30) {
+      return { success: false, error: "Username must be 1-30 characters" };
+    }
+    if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+      return { success: false, error: "Username can only contain letters, numbers, _ and -" };
+    }
+    
     if (accounts[username]) {
       return { success: false, error: "Username already exists" };
     }
@@ -99,7 +108,7 @@
     let expires = null;
     if (expirationDays && expirationDays !== "never") {
       const days = parseInt(expirationDays);
-      if (days < 1 || days > 365) {
+      if (isNaN(days) || days < 1 || days > 365) {
         return { success: false, error: "Expiration must be 1-365 days" };
       }
       expires = Date.now() + (days * 24 * 60 * 60 * 1000);
@@ -112,7 +121,11 @@
       expires
     };
     
-    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+    try {
+      localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+    } catch(e) {
+      return { success: false, error: "Storage error: " + e.message };
+    }
     return { success: true };
   }
 
@@ -210,13 +223,13 @@
         <p style="color:#7fb887;margin:0;font-size:14px;">v${VERSION}</p>
       </div>
       <div>
-        <label style="color:#2ecc71;font-weight:bold;font-size:14px;">Username</label>
+        <label for="loginUsername" style="color:#2ecc71;font-weight:bold;font-size:14px;">Username</label>
         <input type="text" id="loginUsername" placeholder="Enter username" autocomplete="off">
         
-        <label style="color:#2ecc71;font-weight:bold;font-size:14px;margin-top:12px;display:block;">PIN (4 digits)</label>
+        <label for="loginPassword" style="color:#2ecc71;font-weight:bold;font-size:14px;margin-top:12px;display:block;">PIN (4 digits)</label>
         <input type="password" id="loginPassword" placeholder="Enter 4-digit PIN" maxlength="4" pattern="[0-9]*" inputmode="numeric">
         
-        <div id="loginError" class="login-error"></div>
+        <div id="loginError" class="login-error" role="alert" aria-live="polite"></div>
         
         <button id="loginBtn">Login</button>
       </div>
@@ -259,6 +272,11 @@
     };
 
     loginBtn.onclick = attemptLogin;
+    
+    // Filter non-numeric input in PIN field
+    passwordInput.addEventListener("input", (e) => {
+      e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    });
     
     // Handle Enter key
     passwordInput.addEventListener("keypress", (e) => {
@@ -966,11 +984,30 @@
     const adminPanel = root.querySelector("#adminPanel");
     adminPanel.style.display = "block";
     
+    // HTML escape helper
+    const escapeHtml = (text) => {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    };
+    
     // Format date helper
     const formatDate = (timestamp) => {
       if(!timestamp) return "Never";
       const d = new Date(timestamp);
       return d.toLocaleDateString() + " " + d.toLocaleTimeString();
+    };
+    
+    // Message timeout tracker
+    let msgTimeout = null;
+    
+    // Show message helper
+    const showMessage = (msgDiv, text, isError) => {
+      if(msgTimeout) clearTimeout(msgTimeout);
+      msgDiv.textContent = text;
+      msgDiv.style.color = isError ? "#e74c3c" : "#2ecc71";
+      msgDiv.style.display = "block";
+      msgTimeout = setTimeout(() => msgDiv.style.display = "none", 3000);
     };
     
     // Refresh accounts list
@@ -986,18 +1023,19 @@
         const status = isExpired ? "❌ Expired" : "✅ Active";
         const statusColor = isExpired ? "#e74c3c" : "#2ecc71";
         const canDelete = username !== "Sun";
+        const safeUsername = escapeHtml(username);
         
         html += `
           <div style="background:#0d1b0e;padding:10px;margin:6px 0;border-radius:6px;border:1px solid #27ae60;font-size:11px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <strong style="color:#2ecc71;">${username}${acc.admin ? " 👑" : ""}</strong>
+              <strong style="color:#2ecc71;">${safeUsername}${acc.admin ? " 👑" : ""}</strong>
               <span style="color:${statusColor};font-size:10px;">${status}</span>
             </div>
             <div style="color:#7fb887;font-size:10px;line-height:1.4;">
-              Created: ${formatDate(acc.created)}<br>
-              Expires: ${formatDate(acc.expires)}
+              Created: ${escapeHtml(formatDate(acc.created))}<br>
+              Expires: ${escapeHtml(formatDate(acc.expires))}
             </div>
-            ${canDelete ? `<button class="delete-account-btn" data-username="${username}" style="width:100%;padding:6px;margin-top:8px;background:#c0392b;border:none;border-radius:4px;color:#fff;cursor:pointer;font-size:10px;">🗑️ Delete</button>` : ""}
+            ${canDelete ? `<button class="delete-account-btn" data-username="${escapeHtml(username)}" style="width:100%;padding:6px;margin-top:8px;background:#c0392b;border:none;border-radius:4px;color:#fff;cursor:pointer;font-size:10px;">🗑️ Delete</button>` : ""}
           </div>
         `;
       }
@@ -1012,21 +1050,25 @@
             const result = deleteAccount(username);
             const msgDiv = root.querySelector("#createAccountMsg");
             if(result.success) {
-              msgDiv.textContent = "✅ Account deleted";
-              msgDiv.style.color = "#2ecc71";
+              showMessage(msgDiv, "✅ Account deleted", false);
               refreshAccountsList();
             } else {
-              msgDiv.textContent = "❌ " + result.error;
-              msgDiv.style.color = "#e74c3c";
+              showMessage(msgDiv, "❌ " + result.error, true);
             }
-            msgDiv.style.display = "block";
-            setTimeout(() => msgDiv.style.display = "none", 3000);
           }
         };
       });
     };
     
+    
     // Create account handler
+    const newPasswordInput = root.querySelector("#newPassword");
+    
+    // Filter non-numeric input in PIN field
+    newPasswordInput.addEventListener("input", (e) => {
+      e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    });
+    
     root.querySelector("#createAccountBtn").onclick = () => {
       const usernameInput = root.querySelector("#newUsername");
       const passwordInput = root.querySelector("#newPassword");
@@ -1038,28 +1080,21 @@
       const expDays = expDaysInput.value.trim() || "never";
       
       if(!username) {
-        msgDiv.textContent = "❌ Username required";
-        msgDiv.style.color = "#e74c3c";
-        msgDiv.style.display = "block";
+        showMessage(msgDiv, "❌ Username required", true);
         return;
       }
       
       const result = createAccount(username, password, expDays);
       
       if(result.success) {
-        msgDiv.textContent = "✅ Account created successfully";
-        msgDiv.style.color = "#2ecc71";
+        showMessage(msgDiv, "✅ Account created successfully", false);
         usernameInput.value = "";
         passwordInput.value = "";
         expDaysInput.value = "";
         refreshAccountsList();
       } else {
-        msgDiv.textContent = "❌ " + result.error;
-        msgDiv.style.color = "#e74c3c";
+        showMessage(msgDiv, "❌ " + result.error, true);
       }
-      
-      msgDiv.style.display = "block";
-      setTimeout(() => msgDiv.style.display = "none", 3000);
     };
     
     // Initial load of accounts
