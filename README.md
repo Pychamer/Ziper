@@ -1,6 +1,6 @@
-# 🌲 Ziper v1.1.0 RELEASE
+# 🌲 Ziper v1.2.1 RELEASE
 
-A powerful client-side JavaScript bookmarklet that injects a floating control panel into any webpage. Features include page manipulation tools, AI chat assistance, games, screen effects, and custom JavaScript execution.
+A powerful client-side JavaScript bookmarklet that injects a floating control panel into any webpage. Features include page manipulation tools, AI chat assistance, games, screen effects, custom JavaScript execution, and secure account management with an integrated login system.
 
 ## ✨ Features
 

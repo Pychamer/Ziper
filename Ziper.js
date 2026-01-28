@@ -225,10 +225,10 @@
     background:linear-gradient(135deg, #0d1b0e 0%, #1a3a1f 100%);
     color:#e0ffe0;
     padding:0;
-    border-radius:16px;
+    border-radius:12px;
     z-index:9999999;
-    width:380px;
-    box-shadow:0 8px 32px rgba(0,255,0,.2);
+    width:320px;
+    box-shadow:0 6px 24px rgba(0,255,0,.2);
     font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
     user-select:none;
     pointer-events:auto;
@@ -240,8 +240,8 @@
       #ziperRoot *{box-sizing:border-box;}
       #ziperRoot .header{
         background:linear-gradient(90deg, #27ae60 0%, #2ecc71 100%);
-        padding:12px 16px;
-        border-radius:14px 14px 0 0;
+        padding:10px 12px;
+        border-radius:10px 10px 0 0;
         display:flex;
         justify-content:space-between;
         align-items:center;
@@ -249,7 +249,7 @@
       }
       #ziperRoot .header h3{
         margin:0;
-        font-size:18px;
+        font-size:16px;
         font-weight:bold;
         color:#fff;
         text-shadow:0 2px 4px rgba(0,0,0,.3);
@@ -257,7 +257,7 @@
       #ziperRoot .beta-badge{
         background:#f39c12;
         color:#000;
-        padding:4px 10px;
+        padding:3px 8px;
         border-radius:12px;
         font-size:11px;
         font-weight:bold;
@@ -270,13 +270,13 @@
       }
       #ziperRoot .tab{
         flex:1;
-        padding:12px;
+        padding:10px 8px;
         text-align:center;
         cursor:pointer;
         color:#7fb887;
         border:none;
         background:transparent;
-        font-size:14px;
+        font-size:13px;
         transition:all .2s;
         border-bottom:3px solid transparent;
       }
@@ -290,8 +290,8 @@
         background:rgba(46,204,113,.15);
       }
       #ziperRoot .content{
-        padding:16px;
-        height:320px;
+        padding:12px;
+        height:260px;
         overflow-y:auto;
       }
       #ziperRoot .content::-webkit-scrollbar{width:8px;}
@@ -301,18 +301,18 @@
       #ziperRoot .tab-content.active{display:block;}
       #ziperRoot .feature-btn{
         width:100%;
-        padding:12px;
-        margin:8px 0;
+        padding:10px;
+        margin:6px 0;
         background:#1a3a1f;
         border:2px solid #27ae60;
-        border-radius:8px;
+        border-radius:6px;
         color:#2ecc71;
         cursor:pointer;
-        font-size:14px;
+        font-size:13px;
         transition:all .2s;
         display:flex;
         align-items:center;
-        gap:10px;
+        gap:8px;
       }
       #ziperRoot .feature-btn:hover{
         background:#27ae60;
