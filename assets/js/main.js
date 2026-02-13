@@ -215,3 +215,52 @@ function updateActiveNav() {
 
 // Initialize
 updateActiveNav();
+
+// ========================================
+// FULLSCREEN IMAGE MODAL
+// ========================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+    const closeBtn = document.querySelector('.modal-close');
+    const galleryImages = document.querySelectorAll('.gallery-image');
+    
+    if (modal && modalImg && galleryImages.length > 0) {
+        // Add click event to all gallery images
+        galleryImages.forEach(img => {
+            img.addEventListener('click', function() {
+                modal.classList.add('active');
+                modalImg.src = this.src;
+                modalImg.alt = this.alt;
+                document.body.style.overflow = 'hidden'; // Prevent scrolling
+            });
+        });
+        
+        // Close modal when clicking the X button
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                closeModal();
+            });
+        }
+        
+        // Close modal when clicking outside the image
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal || e.target === closeBtn) {
+                closeModal();
+            }
+        });
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.classList.contains('active')) {
+                closeModal();
+            }
+        });
+        
+        function closeModal() {
+            modal.classList.remove('active');
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+    }
+});
