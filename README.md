@@ -63,6 +63,26 @@ In the "Design Process" section, you can add more media items:
 
 For GIFs, use the same format as images. Just provide the URL from your image hosting service (ImgBB, Imgur, etc.).
 
+#### Getting Direct Image URLs from ImgBB
+
+If you have an ImgBB link like `https://ibb.co/7xv6g56c`, you need to get the direct image URL to display it on your website:
+
+**Method 1: Right-click the image**
+1. Go to the ImgBB link in your browser
+2. Right-click on the image
+3. Select "Copy Image Address" or "Copy Image Link"
+4. Paste this URL in your HTML `<img src="...">` tag
+
+**Method 2: View the embed code**
+1. Go to the ImgBB link
+2. Click on "Get share links"
+3. Copy the "Direct link" or "HTML full linked" code
+4. Use the URL from there
+
+**Example:**
+- ImgBB page: `https://ibb.co/7xv6g56c`
+- Direct image URL: `https://i.ibb.co/xxxxxx/image.jpg` (get this by right-clicking)
+
 #### Add OnShape Links
 Add links to your OnShape designs:
 ```html
