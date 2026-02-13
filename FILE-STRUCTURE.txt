@@ -1,0 +1,81 @@
+📁 Medication Reminder Website - File Structure
+================================================
+
+Your website now has the following structure:
+
+📦 Ziper/
+├── 📄 index.html                  # Home page (Hero, Features, CTA)
+├── 📄 about.html                  # About Us (Team profiles, Mission)
+├── 📄 story.html                  # Our Story (Timeline, Motivation)
+├── 📄 parts.html                  # Parts List (Components placeholder)
+├── 📄 design.html                 # Design Process (Gallery, Stages)
+│
+├── 📁 assets/
+│   ├── 📁 css/
+│   │   └── 📄 styles.css          # Dark red theme styles (20KB+)
+│   │
+│   ├── 📁 js/
+│   │   └── 📄 main.js             # Interactive features & animations
+│   │
+│   └── 📁 images/                 # 🖼️ PUT YOUR IMAGES HERE!
+│       └── 📄 .gitkeep            # Placeholder file
+│
+├── 📄 README.md                   # Project documentation
+├── 📄 ADDING-IMAGES.md           # How to add images guide
+├── 📄 LICENSE                     # Project license
+└── 📄 Ziper.js                    # Original project file
+
+🎨 THEME: Dark Red (#8B0000, #DC143C)
+📱 RESPONSIVE: Mobile, Tablet, Desktop
+✨ ANIMATIONS: Fade-ins, Slide-ins, Hover effects
+🔗 NAVIGATION: Multi-page with smooth transitions
+
+PAGES OVERVIEW:
+===============
+
+1. HOME (index.html)
+   - Hero section with gradient background
+   - 4 feature cards with icons
+   - CTA section
+   - Animated scroll indicator
+
+2. ABOUT US (about.html)
+   - Team member profiles (Ranish & Andrew)
+   - Circular avatar placeholders
+   - Mission statement
+   - Card-based layout
+
+3. OUR STORY (story.html)
+   - Project origin story
+   - Vertical timeline with 4 stages
+   - Motivation sections
+   - Animated timeline markers
+
+4. PARTS LIST (parts.html)
+   - Placeholder for components
+   - 4 category cards
+   - Coming soon notice
+   - Ready for your parts data
+
+5. DESIGN PROCESS (design.html)
+   - 4 development stage cards
+   - Image gallery (4 placeholders)
+   - Link to Google Drive prototypes
+   - Tools & software section
+
+TO ADD YOUR IMAGES:
+==================
+
+1. Copy your images to: assets/images/
+2. Open: design.html
+3. Find: <div class="image-placeholder">
+4. Replace with: <img src="assets/images/your-image.jpg" alt="Description">
+5. See ADDING-IMAGES.md for detailed instructions
+
+EXAMPLE:
+--------
+<img src="assets/images/prototype.jpg" alt="Prototype">
+<img src="assets/images/animation.gif" alt="Animation">
+<img src="assets/images/concept.png" alt="Concept">
+
+That's it! Your dark red themed multi-page website is ready! 🚀
