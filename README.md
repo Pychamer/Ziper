@@ -1,14 +1,21 @@
-# Medication Reminder - Website
+# TimeMed - Medication Reminder Website
 
-A modern, dark red themed multi-page website showcasing the Medication Reminder invention project by Ranish Sapkota and Andrew Noda.
+A modern, clean website showcasing the TimeMed medication reminder invention project by Ranish Sapkota and Andrew Noda.
+
+## 🌐 Live Website
+
+**View the website online:** `https://pychamer.github.io/Ziper/`
+
+The website is automatically deployed to GitHub Pages whenever changes are pushed to the repository.
 
 ## 🎨 Design Features
 
-- **Dark Red Theme**: Professional dark theme with red accents (#8B0000, #DC143C)
+- **Simple Black & Gray Theme**: Clean, professional design with solid colors
 - **Multiple Pages**: Separate pages for better navigation (Home, About, Story, Parts, Design)
 - **Smooth Animations**: Fade-ins, slide-ins, hover effects, and transitions
 - **Responsive Design**: Works perfectly on desktop, tablet, and mobile devices
-- **Modern UI**: Card-based layouts, gradient effects, and interactive elements
+- **Modern UI**: Card-based layouts and interactive elements
+- **Fullscreen Image Gallery**: Click any image to view it fullscreen
 
 ## 📁 Project Structure
 
@@ -21,11 +28,44 @@ A modern, dark red themed multi-page website showcasing the Medication Reminder 
 ├── design.html         # Design Process page
 ├── assets/
 │   ├── css/
-│   │   └── styles.css  # Main stylesheet with dark red theme
+│   │   └── styles.css  # Main stylesheet
 │   ├── js/
 │   │   └── main.js     # JavaScript for interactions
-│   └── images/         # Place your images and GIFs here
+│   └── images/         # Project images and GIFs
+└── .github/
+    └── workflows/
+        └── deploy.yml  # GitHub Pages deployment workflow
 ```
+
+## 🚀 GitHub Pages Deployment
+
+This website is configured to automatically deploy to GitHub Pages using GitHub Actions.
+
+### Setup Instructions
+
+1. **Enable GitHub Pages** in your repository settings:
+   - Go to Settings > Pages
+   - Source: GitHub Actions
+   
+2. **Push changes** to trigger deployment:
+   ```bash
+   git add .
+   git commit -m "Update website"
+   git push
+   ```
+
+3. **View your site** at:
+   - `https://[username].github.io/[repository-name]/`
+   - For this repo: `https://pychamer.github.io/Ziper/`
+
+### Deployment Status
+
+The deployment workflow runs automatically on:
+- Push to `main` branch
+- Push to `copilot/create-website-for-oc-maker` branch
+- Manual workflow dispatch
+
+Check the "Actions" tab in your GitHub repository to see deployment status.
 
 ## 🖼️ Adding Your Images
 
@@ -36,18 +76,9 @@ A modern, dark red themed multi-page website showcasing the Medication Reminder 
 
 Example in `design.html`:
 ```html
-<!-- Replace the placeholder -->
 <div class="image-box">
-    <img src="assets/images/your-image.jpg" alt="Description">
+    <img src="assets/images/your-image.jpg" alt="Description" class="gallery-image">
 </div>
-```
-
-### Method 2: Use Direct Links
-
-If your images are already hosted somewhere (like Google Drive after making them public), you can use direct URLs:
-
-```html
-<img src="YOUR_IMAGE_URL_HERE" alt="Description">
 ```
 
 ### Supported Image Formats
@@ -65,9 +96,8 @@ If your images are already hosted somewhere (like Google Drive after making them
 - CTA section
 
 ### 2. About Us (`about.html`)
-- Team member profiles
+- Team member profiles (Ranish Sapkota & Andrew Noda)
 - Mission statement
-- Animated team cards
 
 ### 3. Our Story (`story.html`)
 - Project origin story
@@ -76,16 +106,40 @@ If your images are already hosted somewhere (like Google Drive after making them
 
 ### 4. Parts List (`parts.html`)
 - Component categories
-- Placeholder for parts information
-- Coming soon sections
+- Technical specifications
 
 ### 5. Design Process (`design.html`)
 - Development stages
-- Prototype gallery (ready for your images)
+- Prototype gallery with fullscreen modal
 - Tools & software used
 - Link to Google Drive prototypes
 
-## 🚀 How to View
+## 🎨 Color Scheme
+
+Simple black and gray palette for a clean, professional look:
+
+```css
+:root {
+    --primary: #333333;          /* Medium gray */
+    --dark: #1a1a1a;             /* Dark gray */
+    --light: #666666;            /* Light gray */
+    --accent: #4a4a4a;           /* Accent gray */
+    --dark-bg: #000000;          /* Pure black */
+    --darker-bg: #0a0a0a;        /* Near black */
+    --card-bg: #1a1a1a;          /* Card background */
+}
+```
+
+## ✨ Interactive Features
+
+- **Mobile Menu**: Hamburger menu for mobile devices
+- **Smooth Scrolling**: Animated scroll between sections
+- **Hover Effects**: Cards lift on hover
+- **Page Transitions**: Fade-in animations on load
+- **Fullscreen Image Modal**: Click any gallery image to view fullscreen
+- **Keyboard Support**: Press Escape to close fullscreen modal
+
+## 🖥️ Local Development
 
 ### Option 1: Direct File Access
 Simply open any `.html` file in your web browser.
@@ -103,50 +157,18 @@ python3 -m http.server 8000
 2. Right-click any HTML file
 3. Select "Open with Live Server"
 
-## 🎨 Customizing Colors
-
-The dark red theme uses CSS variables in `assets/css/styles.css`:
-
-```css
-:root {
-    --primary-red: #8B0000;      /* Dark red */
-    --dark-red: #660000;         /* Darker red */
-    --light-red: #A52A2A;        /* Brown-red */
-    --accent-red: #DC143C;       /* Crimson accent */
-    --dark-bg: #0a0a0a;          /* Dark background */
-    --darker-bg: #050505;        /* Darker background */
-    --card-bg: #1a1a1a;          /* Card background */
-}
-```
-
-Change these values to customize the color scheme.
-
-## ✨ Interactive Features
-
-- **Mobile Menu**: Hamburger menu for mobile devices
-- **Smooth Scrolling**: Animated scroll between sections
-- **Hover Effects**: Cards lift and glow on hover
-- **Page Transitions**: Fade-in animations on load
-- **Parallax Hero**: Subtle parallax effect on home page
-- **Button Ripples**: Material Design-style ripple effects
-
 ## 📱 Responsive Breakpoints
 
 - Desktop: 1200px and above
 - Tablet: 768px - 1199px
 - Mobile: Below 768px
 
-## 🔗 External Links
-
-- **Google Drive Prototypes**: Already linked in the Design page
-- Can add more external links as needed
-
 ## 🎬 Adding GIFs
 
 GIFs work the same as images:
 
 ```html
-<img src="assets/images/your-animation.gif" alt="Animation">
+<img src="assets/images/your-animation.gif" alt="Animation" class="gallery-image">
 ```
 
 For optimal performance:
@@ -164,11 +186,11 @@ For optimal performance:
 
 ## 📝 To-Do
 
-- [ ] Add team member photos
-- [ ] Add prototype images/GIFs
-- [ ] Complete parts list
-- [ ] Add Andrew Noda's bio
-- [ ] Add more design process images
+- [x] Set up GitHub Pages deployment
+- [x] Add fullscreen image modal
+- [x] Create responsive design
+- [x] Add all prototype images
+- [ ] Add more design process images (as needed)
 
 ## 👥 Team
 
@@ -182,3 +204,4 @@ See LICENSE file for details.
 ---
 
 **Making medication management easier for everyone** 💊
+
