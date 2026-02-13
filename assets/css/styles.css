@@ -783,6 +783,13 @@ section {
     margin-bottom: 1rem;
 }
 
+.gallery-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
 .image-caption {
     margin-top: 1rem;
     color: var(--text-secondary);
