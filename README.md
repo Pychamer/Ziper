@@ -1,24 +1,96 @@
-# Medication Reminder - OC Maker Project Website
+# Medication Reminder - Website
 
-A website showcasing the Medication Reminder invention project by Ranish Sapkota and Andrew Noda.
+A modern, dark red themed multi-page website showcasing the Medication Reminder invention project by Ranish Sapkota and Andrew Noda.
 
-## Overview
+## 🎨 Design Features
 
-This website presents an innovative medication reminder solution designed to help people who need assistance remembering to take their medication. The project is particularly beneficial for elderly people and anyone taking multiple medications.
+- **Dark Red Theme**: Professional dark theme with red accents (#8B0000, #DC143C)
+- **Multiple Pages**: Separate pages for better navigation (Home, About, Story, Parts, Design)
+- **Smooth Animations**: Fade-ins, slide-ins, hover effects, and transitions
+- **Responsive Design**: Works perfectly on desktop, tablet, and mobile devices
+- **Modern UI**: Card-based layouts, gradient effects, and interactive elements
 
-## Website Sections
+## 📁 Project Structure
 
-1. **About Us** - Team member profiles (Ranish Sapkota and Andrew Noda)
-2. **Our Story** - The motivation and vision behind the project
-3. **Parts List** - Component details (pending updates)
-4. **Design Process** - Development stages, prototypes, and design materials
+```
+/
+├── index.html          # Home page
+├── about.html          # About Us page
+├── story.html          # Our Story page
+├── parts.html          # Parts List page
+├── design.html         # Design Process page
+├── assets/
+│   ├── css/
+│   │   └── styles.css  # Main stylesheet with dark red theme
+│   ├── js/
+│   │   └── main.js     # JavaScript for interactions
+│   └── images/         # Place your images and GIFs here
+```
 
-## How to View the Website
+## 🖼️ Adding Your Images
+
+### Method 1: Add to GitHub
+
+1. Place your images/GIFs in the `assets/images/` folder
+2. Update the HTML to reference your images
+
+Example in `design.html`:
+```html
+<!-- Replace the placeholder -->
+<div class="image-box">
+    <img src="assets/images/your-image.jpg" alt="Description">
+</div>
+```
+
+### Method 2: Use Direct Links
+
+If your images are already hosted somewhere (like Google Drive after making them public), you can use direct URLs:
+
+```html
+<img src="YOUR_IMAGE_URL_HERE" alt="Description">
+```
+
+### Supported Image Formats
+- `.jpg` / `.jpeg`
+- `.png`
+- `.gif` (for animations)
+- `.svg`
+- `.webp`
+
+## 🎯 Pages Overview
+
+### 1. Home Page (`index.html`)
+- Hero section with call-to-action buttons
+- Key features grid
+- CTA section
+
+### 2. About Us (`about.html`)
+- Team member profiles
+- Mission statement
+- Animated team cards
+
+### 3. Our Story (`story.html`)
+- Project origin story
+- Timeline of development
+- Project motivation
+
+### 4. Parts List (`parts.html`)
+- Component categories
+- Placeholder for parts information
+- Coming soon sections
+
+### 5. Design Process (`design.html`)
+- Development stages
+- Prototype gallery (ready for your images)
+- Tools & software used
+- Link to Google Drive prototypes
+
+## 🚀 How to View
 
 ### Option 1: Direct File Access
-Simply open `index.html` in your web browser.
+Simply open any `.html` file in your web browser.
 
-### Option 2: Using a Local Server
+### Option 2: Local Server
 ```bash
 # Using Python 3
 python3 -m http.server 8000
@@ -26,115 +98,87 @@ python3 -m http.server 8000
 # Then open http://localhost:8000 in your browser
 ```
 
-## How to Update the Website
+### Option 3: VS Code Live Server
+1. Install "Live Server" extension in VS Code
+2. Right-click any HTML file
+3. Select "Open with Live Server"
 
-### Adding More Content
+## 🎨 Customizing Colors
 
-#### Update Team Member Information
-Edit `index.html` and find the "About Us" section. To add Andrew Noda's bio, replace the placeholder text in his member card:
-```html
-<div class="member-card">
-    <h3>Andrew Noda</h3>
-    <p class="role">Co-Creator</p>
-    <p class="bio">Your bio text here...</p>
-</div>
+The dark red theme uses CSS variables in `assets/css/styles.css`:
+
+```css
+:root {
+    --primary-red: #8B0000;      /* Dark red */
+    --dark-red: #660000;         /* Darker red */
+    --light-red: #A52A2A;        /* Brown-red */
+    --accent-red: #DC143C;       /* Crimson accent */
+    --dark-bg: #0a0a0a;          /* Dark background */
+    --darker-bg: #050505;        /* Darker background */
+    --card-bg: #1a1a1a;          /* Card background */
+}
 ```
 
-#### Add Parts to the Parts List
-Edit `index.html` and find the "Parts List" section. Replace the placeholder with actual parts:
+Change these values to customize the color scheme.
+
+## ✨ Interactive Features
+
+- **Mobile Menu**: Hamburger menu for mobile devices
+- **Smooth Scrolling**: Animated scroll between sections
+- **Hover Effects**: Cards lift and glow on hover
+- **Page Transitions**: Fade-in animations on load
+- **Parallax Hero**: Subtle parallax effect on home page
+- **Button Ripples**: Material Design-style ripple effects
+
+## 📱 Responsive Breakpoints
+
+- Desktop: 1200px and above
+- Tablet: 768px - 1199px
+- Mobile: Below 768px
+
+## 🔗 External Links
+
+- **Google Drive Prototypes**: Already linked in the Design page
+- Can add more external links as needed
+
+## 🎬 Adding GIFs
+
+GIFs work the same as images:
+
 ```html
-<div class="parts-content">
-    <ul>
-        <li>Part 1 name - description</li>
-        <li>Part 2 name - description</li>
-        <!-- Add more parts here -->
-    </ul>
-</div>
+<img src="assets/images/your-animation.gif" alt="Animation">
 ```
 
-#### Add Images, GIFs, and Videos
-In the "Design Process" section, you can add more media items:
-```html
-<div class="media-item">
-    <h4>Your Image Title</h4>
-    <img src="YOUR_IMAGE_URL_HERE" alt="Description">
-</div>
-```
+For optimal performance:
+- Keep GIF file sizes under 5MB
+- Use compressed GIFs when possible
+- Consider using video formats (.mp4) for longer animations
 
-For GIFs, use the same format as images. Just provide the URL from your image hosting service (ImgBB, Imgur, etc.).
+## 🛠️ Browser Support
 
-#### Getting Direct Image URLs from ImgBB
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
+- Mobile browsers (iOS Safari, Chrome Mobile)
 
-If you have an ImgBB link like `https://ibb.co/7xv6g56c`, you need to get the direct image URL to display it on your website:
+## 📝 To-Do
 
-**Method 1: Right-click the image**
-1. Go to the ImgBB link in your browser
-2. Right-click on the image
-3. Select "Copy Image Address" or "Copy Image Link"
-4. Paste this URL in your HTML `<img src="...">` tag
+- [ ] Add team member photos
+- [ ] Add prototype images/GIFs
+- [ ] Complete parts list
+- [ ] Add Andrew Noda's bio
+- [ ] Add more design process images
 
-**Method 2: View the embed code**
-1. Go to the ImgBB link
-2. Click on "Get share links"
-3. Copy the "Direct link" or "HTML full linked" code
-4. Use the URL from there
+## 👥 Team
 
-**Example:**
-- ImgBB page: `https://ibb.co/7xv6g56c`
-- Direct image URL: `https://i.ibb.co/xxxxxx/image.jpg` (get this by right-clicking)
+- **Ranish Sapkota** - Co-Creator & Developer
+- **Andrew Noda** - Co-Creator
 
-#### Add OnShape Links
-Add links to your OnShape designs:
-```html
-<a href="YOUR_ONSHAPE_URL" target="_blank" class="button">View OnShape Design</a>
-```
+## 📄 License
 
-### Customizing Styles
-
-Edit `styles.css` to change:
-- Colors: Modify the gradient colors in `.hero` and `header`
-- Fonts: Change the `font-family` in the `body` selector
-- Spacing: Adjust `padding` and `margin` values
-- Layout: Modify grid template columns in responsive sections
-
-## Links to Design Materials
-
-- **Concept Image**: https://ibb.co/7xv6g56c
-- **Prototype Builds**: https://drive.google.com/drive/folders/12crWSnZ6jHS_htUK4NIm90SLdPYHeeqs?usp=drive_link
-
-## Features
-
-- ✅ Responsive design (works on desktop, tablet, and mobile)
-- ✅ Modern gradient styling
-- ✅ Smooth navigation with anchor links
-- ✅ Card-based layout for team members
-- ✅ Organized sections for easy content updates
-- ✅ External links to images and prototypes
-- ✅ Placeholder sections for future content
-
-## Project Goals
-
-This invention aims to:
-- Help people remember to take their medication consistently
-- Accommodate various medication types (pills, sprays, liquids)
-- Serve all age groups, especially elderly individuals
-- Simplify medication management by storing whole medication boxes
-
-## Future Updates
-
-The website is designed to be easily updated. Planned additions include:
-- Complete parts list with technical specifications
-- Additional images and GIFs of the design process
-- Hand-drawn sketches
-- OnShape 3D model files
-- More detailed prototype documentation
-- Andrew Noda's bio
-
-## Contact
-
-For questions or contributions, please contact:
-- Ranish Sapkota
-- Andrew Noda
+See LICENSE file for details.
 
 ---
-© 2024 Medication Reminder Project by Ranish Sapkota & Andrew Noda
+
+**Making medication management easier for everyone** 💊
