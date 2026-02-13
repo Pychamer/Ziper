@@ -360,6 +360,8 @@ section {
 
 .features {
     background: var(--dark-bg);
+    position: relative;
+    z-index: 2;
 }
 
 .features-grid {
@@ -853,6 +855,8 @@ section {
 .cta {
     background: linear-gradient(135deg, var(--primary), var(--dark));
     padding: 6rem 0;
+    position: relative;
+    z-index: 2;
 }
 
 .cta-content {
