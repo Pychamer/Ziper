@@ -2,320 +2,11 @@
   if(document.getElementById("ziperRoot")) return;
 
   /* ===== CONFIG ===== */
-  const VERSION = "v1.2.1"; // Updated version with universal account storage
-  const HF_TOKEN = "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"; // Hugging Face API token
-  const HF_MODEL = "HuggingFaceTB/SmolLM2-360M-Instruct"; // AI Model
-  const AI_ENABLED = true; // Re-enabled with Hugging Face
-  const STORAGE_HUB_URL = "https://pychamer.github.io/Ziper/storage-hub.html"; // Universal storage hub
-  
-  /* ===== UNIVERSAL STORAGE SYSTEM ===== */
-  // This system allows accounts to work across all domains by using an iframe
-  // that acts as a central storage hub
-  
-  let storageHub = null;
-  let hubReady = false;
-  let pendingRequests = new Map();
-  let requestCounter = 0;
-  
-  function initStorageHub() {
-    return new Promise((resolve) => {
-      // Create hidden iframe for storage hub
-      const iframe = document.createElement('iframe');
-      iframe.style.display = 'none';
-      iframe.src = STORAGE_HUB_URL;
-      iframe.id = 'ziperStorageHub';
-      
-      // Listen for messages from the hub
-      window.addEventListener('message', (event) => {
-        if (event.source !== iframe.contentWindow) return;
-        
-        const { type, requestId, data, success, error } = event.data;
-        
-        if (type === 'PONG') {
-          hubReady = true;
-          resolve(iframe);
-          return;
-        }
-        
-        const pending = pendingRequests.get(requestId);
-        if (pending) {
-          pendingRequests.delete(requestId);
-          
-          if (type === 'ERROR') {
-            pending.reject(new Error(error || 'Storage hub error'));
-          } else {
-            pending.resolve({ data, success });
-          }
-        }
-      });
-      
-      // Send ping after iframe loads
-      iframe.onload = () => {
-        setTimeout(() => {
-          iframe.contentWindow.postMessage({ type: 'PING', requestId: 0 }, '*');
-          
-          // Fallback timeout
-          setTimeout(() => {
-            if (!hubReady) {
-              console.warn('Storage hub timeout - using local storage');
-              resolve(null);
-            }
-          }, 3000);
-        }, 100);
-      };
-      
-      document.body.appendChild(iframe);
-      storageHub = iframe;
-    });
-  }
-  
-  function sendToHub(type, data = null) {
-    return new Promise((resolve, reject) => {
-      if (!storageHub || !hubReady) {
-        reject(new Error('Storage hub not ready'));
-        return;
-      }
-      
-      const requestId = ++requestCounter;
-      pendingRequests.set(requestId, { resolve, reject });
-      
-      storageHub.contentWindow.postMessage({
-        type,
-        data,
-        requestId
-      }, '*');
-      
-      // Timeout after 5 seconds
-      setTimeout(() => {
-        if (pendingRequests.has(requestId)) {
-          pendingRequests.delete(requestId);
-          reject(new Error('Request timeout'));
-        }
-      }, 5000);
-    });
-  }
-  
-  /* ===== ACCOUNT MANAGEMENT SYSTEM ===== */
-  const ACCOUNTS_KEY = "ziperAccounts";
-  const SESSION_KEY = "ziperCurrentUser";
-  const SESSION_TIME_KEY = "ziperSessionTimestamp";
-  const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
-  let useUniversalStorage = true; // Try to use universal storage
+  const VERSION = "v1.2.2";
+  const HF_TOKEN = "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";
+  const HF_MODEL = "HuggingFaceTB/SmolLM2-360M-Instruct";
+  const AI_ENABLED = true;
 
-  // Initialize accounts with admin - now supports universal storage
-  async function initAccounts() {
-    try {
-      if (useUniversalStorage && hubReady) {
-        const response = await sendToHub('GET_ACCOUNTS');
-        let accounts = response.data || {};
-        
-        // Ensure admin account exists
-        if (!accounts.Sun) {
-          accounts.Sun = {
-            password: "6619",
-            admin: true,
-            created: Date.now(),
-            expires: null
-          };
-          await sendToHub('SAVE_ACCOUNTS', accounts);
-        }
-        
-        return accounts;
-      }
-    } catch (e) {
-      console.warn('Universal storage failed, using local:', e);
-      useUniversalStorage = false;
-    }
-    
-    // Fallback to local storage
-    let accounts = JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || "{}");
-    if (!accounts.Sun) {
-      accounts.Sun = {
-        password: "6619",
-        admin: true,
-        created: Date.now(),
-        expires: null
-      };
-      localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
-    }
-    return accounts;
-  }
-  
-  // Save accounts to storage
-  async function saveAccounts(accounts) {
-    try {
-      if (useUniversalStorage && hubReady) {
-        await sendToHub('SAVE_ACCOUNTS', accounts);
-        return;
-      }
-    } catch (e) {
-      console.warn('Universal storage save failed, using local:', e);
-      useUniversalStorage = false;
-    }
-    
-    // Fallback to local storage
-    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
-  }
-
-  // Get current session - now supports universal storage
-  async function getCurrentSession() {
-    try {
-      let username, timestamp;
-      
-      if (useUniversalStorage && hubReady) {
-        const userResponse = await sendToHub('GET_CURRENT_USER');
-        username = userResponse.data;
-        // For session timestamp, still use local storage as it's session-specific
-        timestamp = localStorage.getItem(SESSION_TIME_KEY);
-      } else {
-        username = localStorage.getItem(SESSION_KEY);
-        timestamp = localStorage.getItem(SESSION_TIME_KEY);
-      }
-      
-      if (!username || !timestamp) return null;
-      
-      const now = Date.now();
-      const sessionAge = now - parseInt(timestamp);
-      
-      if (sessionAge > SESSION_DURATION) {
-        await logout();
-        return null;
-      }
-      
-      const accounts = await initAccounts();
-      const account = accounts[username];
-      
-      if (!account) {
-        await logout();
-        return null;
-      }
-      
-      if (account.expires && account.expires < now) {
-        await logout();
-        return null;
-      }
-      
-      return { username, account };
-    } catch (e) {
-      console.error('Session check error:', e);
-      return null;
-    }
-  }
-
-  // Login function - now supports universal storage
-  async function login(username, password) {
-    try {
-      const accounts = await initAccounts();
-      const account = accounts[username];
-      
-      if (!account) return { success: false, error: "Invalid username" };
-      if (account.password !== password) return { success: false, error: "Invalid password" };
-      
-      const now = Date.now();
-      if (account.expires && account.expires < now) {
-        return { success: false, error: "Account expired" };
-      }
-      
-      // Save session
-      if (useUniversalStorage && hubReady) {
-        await sendToHub('SET_CURRENT_USER', username);
-      } else {
-        localStorage.setItem(SESSION_KEY, username);
-      }
-      localStorage.setItem(SESSION_TIME_KEY, now.toString());
-      
-      return { success: true };
-    } catch (e) {
-      return { success: false, error: e.message };
-    }
-  }
-
-  // Logout function - now supports universal storage
-  async function logout() {
-    try {
-      if (useUniversalStorage && hubReady) {
-        await sendToHub('SET_CURRENT_USER', null);
-      } else {
-        localStorage.removeItem(SESSION_KEY);
-      }
-      localStorage.removeItem(SESSION_TIME_KEY);
-    } catch (e) {
-      // Fallback
-      localStorage.removeItem(SESSION_KEY);
-      localStorage.removeItem(SESSION_TIME_KEY);
-    }
-  }
-
-  // Create account (admin only) - now supports universal storage
-  async function createAccount(username, password, expirationDays, isAdmin = false) {
-    try {
-      const accounts = await initAccounts();
-      
-      // Validate username
-      username = username.trim();
-      if (!username || username.length > 30) {
-        return { success: false, error: "Username must be 1-30 characters" };
-      }
-      if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
-        return { success: false, error: "Username can only contain letters, numbers, _ and -" };
-      }
-      
-      if (accounts[username]) {
-        return { success: false, error: "Username already exists" };
-      }
-      
-      if (!/^\d{4}$/.test(password)) {
-        return { success: false, error: "Password must be exactly 4 digits" };
-      }
-      
-      let expires = null;
-      if (expirationDays && expirationDays !== "never") {
-        const days = parseInt(expirationDays);
-        if (isNaN(days) || days < 1 || days > 365) {
-          return { success: false, error: "Expiration must be 1-365 days" };
-        }
-        expires = Date.now() + (days * 24 * 60 * 60 * 1000);
-      }
-      
-      accounts[username] = {
-        password,
-        admin: isAdmin,
-        created: Date.now(),
-        expires
-      };
-      
-      await saveAccounts(accounts);
-      return { success: true };
-    } catch (e) {
-      return { success: false, error: "Storage error: " + e.message };
-    }
-  }
-
-  // Delete account (admin only) - now supports universal storage
-  async function deleteAccount(username) {
-    try {
-      if (username === "Sun") {
-        return { success: false, error: "Cannot delete admin account" };
-      }
-      
-      const accounts = await initAccounts();
-      if (!accounts[username]) {
-        return { success: false, error: "Account not found" };
-      }
-      
-      delete accounts[username];
-      await saveAccounts(accounts);
-      return { success: true };
-    } catch (e) {
-      return { success: false, error: e.message };
-    }
-  }
-
-  // Get all accounts (admin only) - now supports universal storage
-  async function getAllAccounts() {
-    return await initAccounts();
-  }
-  
   /* ===== THEME SYSTEM ===== */
   const THEMES = {
     green: {
@@ -669,13 +360,13 @@
       </div>
     </div>
     <div class="tabs">
-      <button class="tab ${session ? 'active' : ''}" data-tab="chat">💬 Chat</button>
+      <button class="tab active" data-tab="chat">💬 Chat</button>
       <button class="tab" data-tab="features">🔧 Features</button>
       <button class="tab" data-tab="custom">⚡ Custom</button>
-      <button class="tab ${!session ? 'active' : ''}" data-tab="settings">⚙️ Settings</button>
+      <button class="tab" data-tab="settings">⚙️ Settings</button>
     </div>
     <div class="content">
-      <div class="tab-content ${session ? 'active' : ''}" id="chat-tab">
+      <div class="tab-content active" id="chat-tab">
         <textarea class="chat-input" id="chatInput" placeholder="Ask AI anything..." rows="3"></textarea>
         <button class="send-btn" id="sendChat">🚀 Send Message</button>
         <div id="chatResponse"></div>
@@ -729,21 +420,17 @@
         <button class="run-btn" id="runCustomJS">▶️ Run Custom Code</button>
         <div id="customResponse"></div>
       </div>
-      <div class="tab-content ${!session ? 'active' : ''}" id="settings-tab">
+      <div class="tab-content" id="settings-tab">
         <div style="color:#7fb887;line-height:1.8;">
-          <div id="loginSection">
-            <!-- Login form will be shown if not logged in, account info if logged in -->
-          </div>
-          
           <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #27ae60;">
-            <p><strong style="color:#2ecc71;">Version:</strong> v1.2.0 RELEASE</p>
+            <p><strong style="color:#2ecc71;">Version:</strong> v1.2.2</p>
             <p><strong style="color:#2ecc71;">API:</strong> Hugging Face AI</p>
             <p><strong style="color:#2ecc71;">Model:</strong> SmolLM2-360M</p>
             <p style="margin-top:12px;font-size:12px;color:#2ecc71;">✅ AI Chat enabled</p>
             <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Custom JS runner</p>
-            <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Fun effects & games</p>
+            <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Fun effects &amp; games</p>
             <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Screen filters</p>
-            <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Login system</p>
+            <p style="margin-top:4px;font-size:12px;color:#2ecc71;">✅ Alt+Z to minimize</p>
           </div>
           
           <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #27ae60;">
@@ -756,26 +443,6 @@
               <button class="theme-btn" data-theme="orange">🌅 Sunset Orange</button>
             </div>
           </div>
-          
-          <div id="adminPanel" style="display:none;">
-            <div style="padding-top:16px;border-top:1px solid #27ae60;">
-              <p style="margin-bottom:12px;"><strong style="color:#2ecc71;">👑 Admin Panel</strong></p>
-              
-              <div style="background:#1a3a1f;padding:12px;border-radius:8px;margin-bottom:12px;">
-                <p style="color:#2ecc71;font-weight:bold;font-size:13px;margin-bottom:8px;">Create Account</p>
-                <input type="text" id="newUsername" placeholder="Username" style="width:100%;padding:8px;margin:4px 0;background:#0d1b0e;border:1px solid #27ae60;border-radius:4px;color:#e0ffe0;font-size:12px;">
-                <input type="text" id="newPassword" placeholder="4-digit PIN" maxlength="4" pattern="[0-9]*" inputmode="numeric" style="width:100%;padding:8px;margin:4px 0;background:#0d1b0e;border:1px solid #27ae60;border-radius:4px;color:#e0ffe0;font-size:12px;">
-                <input type="number" id="newExpDays" placeholder="Expiration days (1-365 or leave empty for never)" min="1" max="365" style="width:100%;padding:8px;margin:4px 0;background:#0d1b0e;border:1px solid #27ae60;border-radius:4px;color:#e0ffe0;font-size:12px;">
-                <button id="createAccountBtn" style="width:100%;padding:8px;margin-top:8px;background:#27ae60;border:none;border-radius:4px;color:#fff;cursor:pointer;font-size:12px;">➕ Create Account</button>
-                <div id="createAccountMsg" style="margin-top:8px;font-size:11px;display:none;"></div>
-              </div>
-              
-              <div style="background:#1a3a1f;padding:12px;border-radius:8px;">
-                <p style="color:#2ecc71;font-weight:bold;font-size:13px;margin-bottom:8px;">Accounts</p>
-                <div id="accountsList" style="max-height:200px;overflow-y:auto;"></div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -783,19 +450,8 @@
 
   document.body.appendChild(root);
 
-  // Async initialization function
+  // Initialization
   (async function initZiper() {
-    // Initialize storage hub
-    try {
-      await initStorageHub();
-      console.log('Ziper: Universal storage initialized');
-    } catch (e) {
-      console.warn('Ziper: Using local storage only');
-      useUniversalStorage = false;
-    }
-
-    // Check session
-    const session = await getCurrentSession();
 
     /* ===== SHARED STATE ===== */
     let rbInt = null; // Rainbow mode interval
@@ -807,23 +463,6 @@
     tabs.forEach(tab => {
       tab.onclick = () => {
         const targetTab = tab.getAttribute('data-tab');
-        
-        // If not logged in and trying to access non-settings tab, redirect to settings
-        if (!session && targetTab !== 'settings') {
-          tabs.forEach(t => t.classList.remove('active'));
-          tabContents.forEach(tc => tc.classList.remove('active'));
-        root.querySelector('[data-tab="settings"]').classList.add('active');
-        root.querySelector('#settings-tab').classList.add('active');
-        
-        // Show message
-        const loginError = root.querySelector('#loginError');
-        if (loginError) {
-          loginError.textContent = "⚠️ Please login to access this feature";
-          loginError.style.display = "block";
-          setTimeout(() => loginError.style.display = "none", 3000);
-        }
-        return;
-      }
       
       tabs.forEach(t => t.classList.remove('active'));
       tabContents.forEach(tc => tc.classList.remove('active'));
@@ -930,9 +569,9 @@
   // Minimize button click handler
   root.querySelector("#minimizeWidget").onclick = toggleMinimize;
   
-  // Keyboard shortcut: Ctrl+R
+  // Keyboard shortcut: Alt+Z
   document.addEventListener("keydown", (e) => {
-    if(e.ctrlKey && e.key.toLowerCase() === "r") {
+    if(e.altKey && e.key.toLowerCase() === "z") {
       e.preventDefault();
       toggleMinimize();
     }
@@ -1015,212 +654,6 @@
   
   // Apply saved theme on load
   applyTheme(currentTheme);
-
-  /* ===== USER SESSION & ADMIN PANEL ===== */
-  // Render login section based on session state
-  const loginSection = root.querySelector("#loginSection");
-  
-  if (session) {
-    // User is logged in - show account info
-    loginSection.innerHTML = `
-      <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #27ae60;">
-        <p style="margin-bottom:12px;"><strong style="color:#2ecc71;">🔐 Account</strong></p>
-        <p style="margin-bottom:8px;"><strong style="color:#2ecc71;">👤 Logged in as:</strong> <span id="currentUserDisplay">${session.username}${session.account.admin ? " (Admin)" : ""}</span></p>
-        <button class="theme-btn" id="logoutBtn" style="background:#c0392b;">🚪 Logout</button>
-      </div>
-    `;
-    
-    // Logout handler
-    root.querySelector("#logoutBtn").onclick = async () => {
-      if(confirm("Are you sure you want to logout?")) {
-        await logout();
-        if(rbInt) clearInterval(rbInt);
-        root.remove();
-        location.reload();
-      }
-    };
-  } else {
-    // User is not logged in - show login form
-    loginSection.innerHTML = `
-      <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #27ae60;">
-        <p style="margin-bottom:12px;"><strong style="color:#2ecc71;">🔐 Login</strong></p>
-        <input type="text" id="loginUsername" placeholder="Username" autocomplete="off" style="width:100%;padding:10px;margin:6px 0;background:#1a3a1f;border:2px solid #27ae60;border-radius:6px;color:#e0ffe0;font-size:13px;">
-        <input type="password" id="loginPassword" placeholder="4-digit PIN" maxlength="4" pattern="[0-9]*" inputmode="numeric" style="width:100%;padding:10px;margin:6px 0;background:#1a3a1f;border:2px solid #27ae60;border-radius:6px;color:#e0ffe0;font-size:13px;">
-        <div id="loginError" style="background:#3a1f1f;border:2px solid #e74c3c;color:#ffe0e0;padding:8px;border-radius:6px;margin:6px 0;font-size:12px;display:none;"></div>
-        <button id="loginBtn" style="width:100%;padding:10px;margin-top:6px;background:linear-gradient(90deg, #27ae60 0%, #2ecc71 100%);border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:bold;cursor:pointer;">🔐 Login</button>
-      </div>
-    `;
-    
-    const usernameInput = root.querySelector("#loginUsername");
-    const passwordInput = root.querySelector("#loginPassword");
-    const loginBtn = root.querySelector("#loginBtn");
-    const errorDiv = root.querySelector("#loginError");
-    
-    // Handle login
-    const attemptLogin = async () => {
-      const username = usernameInput.value.trim();
-      const password = passwordInput.value.trim();
-      
-      if (!username) {
-        errorDiv.textContent = "❌ Please enter username";
-        errorDiv.style.display = "block";
-        return;
-      }
-      
-      if (!/^\d{4}$/.test(password)) {
-        errorDiv.textContent = "❌ PIN must be exactly 4 digits";
-        errorDiv.style.display = "block";
-        return;
-      }
-      
-      const result = await login(username, password);
-      
-      if (result.success) {
-        location.reload();
-      } else {
-        errorDiv.textContent = "❌ " + result.error;
-        errorDiv.style.display = "block";
-        passwordInput.value = "";
-      }
-    };
-    
-    loginBtn.onclick = attemptLogin;
-    
-    // Filter non-numeric input in PIN field
-    passwordInput.addEventListener("input", (e) => {
-      e.target.value = e.target.value.replace(/[^0-9]/g, '');
-    });
-    
-    // Handle Enter key
-    passwordInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") attemptLogin();
-    });
-    usernameInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") passwordInput.focus();
-    });
-  }
-  
-  // Show admin panel if user is admin
-  if(session && session.account.admin) {
-    const adminPanel = root.querySelector("#adminPanel");
-    adminPanel.style.display = "block";
-    
-    // HTML escape helper
-    const escapeHtml = (text) => {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    };
-    
-    // Format date helper
-    const formatDate = (timestamp) => {
-      if(!timestamp) return "Never";
-      const d = new Date(timestamp);
-      return d.toLocaleDateString() + " " + d.toLocaleTimeString();
-    };
-    
-    // Message timeout tracker
-    let msgTimeout = null;
-    
-    // Show message helper
-    const showMessage = (msgDiv, text, isError) => {
-      if(msgTimeout) clearTimeout(msgTimeout);
-      msgDiv.textContent = text;
-      msgDiv.style.color = isError ? "#e74c3c" : "#2ecc71";
-      msgDiv.style.display = "block";
-      msgTimeout = setTimeout(() => msgDiv.style.display = "none", 3000);
-    };
-    
-    // Refresh accounts list
-    const refreshAccountsList = async () => {
-      const accounts = await getAllAccounts();
-      const accountsList = root.querySelector("#accountsList");
-      const now = Date.now();
-      
-      let html = "";
-      for(const username in accounts) {
-        const acc = accounts[username];
-        const isExpired = acc.expires && acc.expires < now;
-        const status = isExpired ? "❌ Expired" : "✅ Active";
-        const statusColor = isExpired ? "#e74c3c" : "#2ecc71";
-        const canDelete = username !== "Sun";
-        const safeUsername = escapeHtml(username);
-        
-        html += `
-          <div style="background:#0d1b0e;padding:10px;margin:6px 0;border-radius:6px;border:1px solid #27ae60;font-size:11px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <strong style="color:#2ecc71;">${safeUsername}${acc.admin ? " 👑" : ""}</strong>
-              <span style="color:${statusColor};font-size:10px;">${status}</span>
-            </div>
-            <div style="color:#7fb887;font-size:10px;line-height:1.4;">
-              Created: ${escapeHtml(formatDate(acc.created))}<br>
-              Expires: ${escapeHtml(formatDate(acc.expires))}
-            </div>
-            ${canDelete ? `<button class="delete-account-btn" data-username="${escapeHtml(username)}" style="width:100%;padding:6px;margin-top:8px;background:#c0392b;border:none;border-radius:4px;color:#fff;cursor:pointer;font-size:10px;">🗑️ Delete</button>` : ""}
-          </div>
-        `;
-      }
-      
-      accountsList.innerHTML = html || "<p style='color:#7fb887;font-size:11px;text-align:center;'>No accounts</p>";
-      
-      // Add delete handlers
-      accountsList.querySelectorAll(".delete-account-btn").forEach(btn => {
-        btn.onclick = async () => {
-          const username = btn.getAttribute("data-username");
-          if(confirm(`Delete account "${username}"?`)) {
-            const result = await deleteAccount(username);
-            const msgDiv = root.querySelector("#createAccountMsg");
-            if(result.success) {
-              showMessage(msgDiv, "✅ Account deleted", false);
-              refreshAccountsList();
-            } else {
-              showMessage(msgDiv, "❌ " + result.error, true);
-            }
-          }
-        };
-      });
-    };
-    
-    
-    // Create account handler
-    const newPasswordInput = root.querySelector("#newPassword");
-    
-    // Filter non-numeric input in PIN field
-    newPasswordInput.addEventListener("input", (e) => {
-      e.target.value = e.target.value.replace(/[^0-9]/g, '');
-    });
-    
-    root.querySelector("#createAccountBtn").onclick = async () => {
-      const usernameInput = root.querySelector("#newUsername");
-      const passwordInput = root.querySelector("#newPassword");
-      const expDaysInput = root.querySelector("#newExpDays");
-      const msgDiv = root.querySelector("#createAccountMsg");
-      
-      const username = usernameInput.value.trim();
-      const password = passwordInput.value.trim();
-      const expDays = expDaysInput.value.trim() || "never";
-      
-      if(!username) {
-        showMessage(msgDiv, "❌ Username required", true);
-        return;
-      }
-      
-      const result = await createAccount(username, password, expDays);
-      
-      if(result.success) {
-        showMessage(msgDiv, "✅ Account created successfully", false);
-        usernameInput.value = "";
-        passwordInput.value = "";
-        expDaysInput.value = "";
-        refreshAccountsList();
-      } else {
-        showMessage(msgDiv, "❌ " + result.error, true);
-      }
-    };
-    
-    // Initial load of accounts
-    refreshAccountsList();
-  }
 
   /* ===== AI CHAT WITH HUGGING FACE ===== */
   root.querySelector("#sendChat").onclick = async () => {

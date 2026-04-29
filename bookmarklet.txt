@@ -1,34 +1,29 @@
-ZIPER BOOKMARKLET - v1.0.0 with FlameHub Integration
+ZIPER BOOKMARKLET - v1.2.2
 ================================================================
 
-⚠️ IMPORTANT: Use the GitHub loader method below!
+🚀 BOOKMARKLET CODE (copy this entire line as bookmark URL):
 
-🚀 RECOMMENDED: Load from GitHub (PR Branch)
-==============================================
-This loads the LATEST Ziper.js from this PR with all new features:
+javascript:(function(){var s=document.createElement('script');s.src='https://raw.githubusercontent.com/Pychamer/Ziper/refs/heads/copilot/understand-ziper-capabilities/Ziper.js?t='+Date.now();s.onload=function(){console.log('Ziper loaded!')};document.head.appendChild(s);})();
 
-javascript:(function(){const s=document.createElement('script');s.src='https://raw.githubusercontent.com/Pychamer/Ziper/copilot/understand-ziper-capabilities/Ziper.js?'+Date.now();document.body.appendChild(s);})();
+HOW TO INSTALL:
+1. Create a new bookmark in your browser (Ctrl+D)
+2. Edit the bookmark
+3. Delete the URL and paste the javascript: line above
+4. Save the bookmark
+5. Navigate to any webpage and click the bookmark
 
-COPY THE LINE ABOVE (starting with javascript:) and save as a bookmark!
+KEYBOARD SHORTCUT:
+- Press Alt+Z to minimize/restore the widget (does NOT conflict with browser shortcuts)
 
-📦 After PR is merged, use this for stable main branch:
-
-javascript:(function(){const s=document.createElement('script');s.src='https://raw.githubusercontent.com/Pychamer/Ziper/main/Ziper.js?'+Date.now();document.body.appendChild(s);})();
-
----
-
-Installation Instructions:
-1. Create a new bookmark in your browser
-2. Copy the javascript code above (PR branch version)
-3. Paste it as the URL/Location of the bookmark  
-4. Click the bookmark on any webpage to load Ziper
-
-Features:
-- ✅ AI Chat enabled with Hugging Face API
-- ✅ Blooket GUI with Zip-On's working implementation
-- ✅ Always loads latest version from GitHub
-- ✅ Cache-busted with timestamp for fresh loads
-- ✅ Works in all browsers
-- ✅ No URL length limitations
-
-Note: After the PR is merged to main, switch to the main branch bookmarklet for stability.
+FEATURES:
+- ✅ No login required - loads instantly
+- ✅ AI Chat (Hugging Face)
+- ✅ Rainbow Mode, History Flooder, Edit Page, Translate, Video Speed
+- ✅ AutoClicker, Tab Disguise, Blooket GUI, Timer Controller
+- ✅ Spin Spin, Minecraft Mode, Move Anything
+- ✅ Screen filters (Blur, Grayscale, Sepia, Hue Rotate, Brightness, Contrast)
+- ✅ Games (Breakout, Snake, Pong, Tetris, Space Shooter)
+- ✅ Custom JS runner
+- ✅ 5 color themes
+- ✅ Alt+Z to minimize (stealth mode)
+- ✅ Cache-busted (always loads latest version)
