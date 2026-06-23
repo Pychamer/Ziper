@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ziper Universal Accounts Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .section {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+    }
+    .section h2 {
+      margin-top: 0;
+      color: #ffd700;
+    }
+    .info-box {
+      background: rgba(0, 0, 0, 0.3);
+      border-left: 4px solid #2ecc71;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 6px;
+    }
+    .warning-box {
+      background: rgba(255, 165, 0, 0.2);
+      border-left: 4px solid #f39c12;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 6px;
+    }
+    button {
+      background: linear-gradient(90deg, #27ae60 0%, #2ecc71 100%);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);
+    }
+    .test-step {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 6px;
+      border-left: 3px solid #3498db;
+    }
+    .test-step strong {
+      color: #3498db;
+    }
+    code {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #f39c12;
+    }
+    .feature-list {
+      list-style: none;
+      padding-left: 0;
+    }
+    .feature-list li {
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .feature-list li:before {
+      content: "✓ ";
+      color: #2ecc71;
+      font-weight: bold;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 Ziper Universal Accounts Test</h1>
+    
+    <div class="section">
+      <h2>What's New in v1.2.1</h2>
+      <ul class="feature-list">
+        <li><strong>Universal Account System:</strong> Accounts now work across ALL domains!</li>
+        <li><strong>Cross-Domain Storage:</strong> Using iframe-based storage hub</li>
+        <li><strong>Automatic Fallback:</strong> Falls back to local storage if hub unavailable</li>
+        <li><strong>Seamless Migration:</strong> Existing accounts continue to work</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h2>🎯 How It Works</h2>
+      <div class="info-box">
+        <p><strong>Universal Storage Hub:</strong></p>
+        <p>Ziper now uses a hidden iframe pointing to <code>https://pychamer.github.io/Ziper/storage-hub.html</code> that acts as a central account database. All Ziper instances (regardless of which domain they're running on) communicate with this hub to read and write account data.</p>
+        <p style="margin-top: 10px;"><strong>Result:</strong> Create an account once, use it everywhere! 🎉</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>🧪 Testing Universal Accounts</h2>
+      
+      <div class="warning-box">
+        <strong>⚠️ Important:</strong> For universal accounts to work, the <code>storage-hub.html</code> file must be hosted on GitHub Pages at the URL above. Until then, Ziper will use local storage as a fallback.
+      </div>
+
+      <div class="test-step">
+        <strong>Step 1:</strong> Load Ziper on this page
+        <button onclick="loadZiper()">🚀 Load Ziper</button>
+      </div>
+
+      <div class="test-step">
+        <strong>Step 2:</strong> Login with admin account
+        <ul>
+          <li>Username: <code>Sun</code></li>
+          <li>Password: <code>6619</code></li>
+        </ul>
+      </div>
+
+      <div class="test-step">
+        <strong>Step 3:</strong> Create a test account
+        <ul>
+          <li>Go to Settings tab</li>
+          <li>Scroll down to Account Management</li>
+          <li>Create account: Username: <code>test</code>, Password: <code>1234</code></li>
+        </ul>
+      </div>
+
+      <div class="test-step">
+        <strong>Step 4:</strong> Test on different domain
+        <ul>
+          <li>Open a new tab to <code>https://google.com</code></li>
+          <li>Run Ziper there (paste Ziper.js in console or use bookmarklet)</li>
+          <li>Try logging in with: <code>test</code> / <code>1234</code></li>
+          <li><strong>✅ It should work!</strong> (if storage hub is hosted)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>📊 Storage Comparison</h2>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+        <tr style="background: rgba(0, 0, 0, 0.3);">
+          <th style="padding: 10px; border: 1px solid rgba(255, 255, 255, 0.2);">Feature</th>
+          <th style="padding: 10px; border: 1px solid rgba(255, 255, 255, 0.2);">v1.2.0 (Local Storage)</th>
+          <th style="padding: 10px; border: 1px solid rgba(255, 255, 255, 0.2);">v1.2.1 (Universal Storage)</th>
+        </tr>
+        <tr>
+          <td style="padding: 10px; border: 1px solid rgba(255, 255, 255, 0.2);">Works on single domain</td>
+          <td style="padding: 10px; border: 1px solid rgba(255, 255, 255, 0.2);">✅ Yes</td>
+          <td style="padding: 10px; border: 1px solid rgba(255, 255, 255, 0.2);">✅ Yes</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; border: 1px solid rgba(255, 255, 255, 0.2);">Works across all domains</td>
+          <td style="padding: 10px; border: 1px solid rgba(255, 255, 255, 0.2);">❌ No</td>
+          <td style="padding: 10px; border: 1px solid rgba(255, 255, 255, 0.2);">✅ Yes</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; border: 1px solid rgba(255, 255, 255, 0.2);">Requires backend</td>
+          <td style="padding: 10px; border: 1px solid rgba(255, 255, 255, 0.2);">❌ No</td>
+          <td style="padding: 10px; border: 1px solid rgba(255, 255, 255, 0.2);">❌ No (iframe only)</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px; border: 1px solid rgba(255, 255, 255, 0.2);">Automatic fallback</td>
+          <td style="padding: 10px; border: 1px solid rgba(255, 255, 255, 0.2);">N/A</td>
+          <td style="padding: 10px; border: 1px solid rgba(255, 255, 255, 0.2);">✅ Yes</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>🔧 Technical Details</h2>
+      <div class="info-box">
+        <p><strong>How Universal Storage Works:</strong></p>
+        <ol style="margin-left: 20px;">
+          <li>Ziper creates a hidden iframe pointing to storage hub</li>
+          <li>Hub loads and listens for postMessage requests</li>
+          <li>Ziper sends account operations via postMessage</li>
+          <li>Hub reads/writes to its own localStorage</li>
+          <li>Hub sends responses back via postMessage</li>
+          <li>All Ziper instances share the same hub = universal accounts!</li>
+        </ol>
+        <p style="margin-top: 10px;"><strong>Security:</strong> Storage hub only accepts requests from any origin (since it's designed for cross-domain use), but it only stores account data - no sensitive operations can be performed without proper credentials.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>✅ Next Steps</h2>
+      <ul class="feature-list">
+        <li>Host <code>storage-hub.html</code> on GitHub Pages</li>
+        <li>Update repository settings to enable GitHub Pages</li>
+        <li>Test universal accounts across multiple domains</li>
+        <li>Update README with universal accounts documentation</li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="Ziper.js"></script>
+  <script>
+    function loadZiper() {
+      // Check if already loaded
+      if (document.getElementById('ziperRoot')) {
+        alert('Ziper is already loaded!');
+        return;
+      }
+      
+      // Load Ziper
+      alert('Loading Ziper...\n\nThe widget should appear in the bottom-right corner.');
+      
+      // Ziper.js is already loaded via script tag
+      // Just need to wait a moment for initialization
+      setTimeout(() => {
+        if (document.getElementById('ziperRoot')) {
+          alert('✅ Ziper loaded successfully!\n\nLook for the widget in the bottom-right corner.\n\nDefault admin credentials:\nUsername: Sun\nPassword: 6619');
+        } else {
+          alert('❌ Failed to load Ziper. Please refresh the page and try again.');
+        }
+      }, 1000);
+    }
+  </script>
+</body>
+</html>

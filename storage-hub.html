@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ziper Storage Hub</title>
+</head>
+<body>
+  <script>
+    /**
+     * Ziper Universal Storage Hub
+     * 
+     * This page acts as a central storage location for Ziper accounts.
+     * It uses postMessage API to communicate with Ziper instances running
+     * on any domain, making accounts universal across all websites.
+     */
+
+    const STORAGE_KEY = 'ziperUniversalAccounts';
+    const CURRENT_USER_KEY = 'ziperCurrentUser';
+
+    // Listen for messages from Ziper instances
+    window.addEventListener('message', (event) => {
+      const { type, data, requestId } = event.data;
+
+      try {
+        let response = {};
+
+        switch (type) {
+          case 'GET_ACCOUNTS':
+            response = {
+              type: 'ACCOUNTS_DATA',
+              requestId,
+              data: JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
+            };
+            break;
+
+          case 'SAVE_ACCOUNTS':
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            response = {
+              type: 'SAVE_SUCCESS',
+              requestId,
+              success: true
+            };
+            break;
+
+          case 'GET_CURRENT_USER':
+            response = {
+              type: 'CURRENT_USER_DATA',
+              requestId,
+              data: localStorage.getItem(CURRENT_USER_KEY)
+            };
+            break;
+
+          case 'SET_CURRENT_USER':
+            if (data === null) {
+              localStorage.removeItem(CURRENT_USER_KEY);
+            } else {
+              localStorage.setItem(CURRENT_USER_KEY, data);
+            }
+            response = {
+              type: 'SET_USER_SUCCESS',
+              requestId,
+              success: true
+            };
+            break;
+
+          case 'PING':
+            response = {
+              type: 'PONG',
+              requestId,
+              ready: true
+            };
+            break;
+
+          default:
+            response = {
+              type: 'ERROR',
+              requestId,
+              error: 'Unknown message type'
+            };
+        }
+
+        // Send response back to the requesting origin
+        event.source.postMessage(response, event.origin);
+
+      } catch (error) {
+        // Send error response
+        event.source.postMessage({
+          type: 'ERROR',
+          requestId,
+          error: error.message
+        }, event.origin);
+      }
+    });
+
+    // Signal that hub is ready
+    console.log('Ziper Storage Hub initialized');
+  </script>
+</body>
+</html>

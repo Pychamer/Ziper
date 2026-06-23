@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ziper v1.2.0 - Login System Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #e0ffe0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .info-box {
+            max-width: 800px;
+            margin: 0 auto 20px;
+            padding: 20px;
+            background: #0d1b0e;
+            border: 2px solid #27ae60;
+            border-radius: 12px;
+        }
+        h1 {
+            color: #2ecc71;
+            margin-top: 0;
+        }
+        .credentials {
+            background: #1a3a1f;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .credentials h3 {
+            color: #2ecc71;
+            margin-top: 0;
+        }
+        code {
+            background: #0d1b0e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #2ecc71;
+            font-weight: bold;
+        }
+        ul {
+            line-height: 1.8;
+        }
+        .launch-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(90deg, #27ae60 0%, #2ecc71 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        .launch-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46,204,113,.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="info-box">
+        <h1>🔐 Ziper v1.2.0 - Login System Test</h1>
+        
+        <div class="credentials">
+            <h3>🔑 Test Credentials</h3>
+            <p><strong>Username:</strong> <code>Sun</code></p>
+            <p><strong>Password:</strong> <code>6619</code></p>
+            <p><strong>Admin:</strong> ✅ Yes</p>
+        </div>
+
+        <h3>✨ New Features</h3>
+        <ul>
+            <li>🔐 Login screen with username & 4-digit PIN</li>
+            <li>👤 User session management (24-hour auto-logout)</li>
+            <li>👑 Admin panel in Settings tab</li>
+            <li>➕ Create new accounts with expiration dates</li>
+            <li>🗑️ Delete accounts (except admin)</li>
+            <li>📊 View all accounts with status</li>
+            <li>🚪 Logout functionality</li>
+        </ul>
+
+        <h3>📋 Testing Instructions</h3>
+        <ol>
+            <li>Click the "Launch Ziper" button below</li>
+            <li>Login screen should appear with Matrix green theme</li>
+            <li>Enter username: <code>Sun</code> and password: <code>6619</code></li>
+            <li>After login, main Ziper UI loads with all features</li>
+            <li>Go to Settings tab to see user info and logout button</li>
+            <li>Admin users see "Admin Panel" section below themes</li>
+            <li>Create test accounts, set expiration, and delete them</li>
+        </ol>
+
+        <button class="launch-btn" onclick="loadZiper()">🚀 Launch Ziper v1.2.0</button>
+    </div>
+
+    <script>
+        function loadZiper() {
+            const script = document.createElement('script');
+            script.src = 'Ziper.js';
+            document.body.appendChild(script);
+        }
+    </script>
+</body>
+</html>

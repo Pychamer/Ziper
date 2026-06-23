@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Marketplace New Listing Notifier",
+  "version": "1.0.0",
+  "description": "Monitors Facebook Marketplace for new listings and sends title, URL, and price to a webhook.",
+  "permissions": ["storage", "tabs", "alarms", "permissions"],
+  "host_permissions": ["https://www.facebook.com/*"],
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Marketplace Notifier"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.facebook.com/marketplace/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

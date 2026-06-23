@@ -1,0 +1,29 @@
+ZIPER BOOKMARKLET - v1.2.2
+================================================================
+
+🚀 BOOKMARKLET CODE (copy this entire line as bookmark URL):
+
+javascript:(function(){var s=document.createElement('script');s.src='https://raw.githubusercontent.com/Pychamer/Ziper/refs/heads/copilot/understand-ziper-capabilities/Ziper.js?t='+Date.now();s.onload=function(){console.log('Ziper loaded!')};document.head.appendChild(s);})();
+
+HOW TO INSTALL:
+1. Create a new bookmark in your browser (Ctrl+D)
+2. Edit the bookmark
+3. Delete the URL and paste the javascript: line above
+4. Save the bookmark
+5. Navigate to any webpage and click the bookmark
+
+KEYBOARD SHORTCUT:
+- Press Alt+Z to minimize/restore the widget (does NOT conflict with browser shortcuts)
+
+FEATURES:
+- ✅ No login required - loads instantly
+- ✅ AI Chat (Hugging Face)
+- ✅ Rainbow Mode, History Flooder, Edit Page, Translate, Video Speed
+- ✅ AutoClicker, Tab Disguise, Blooket GUI, Timer Controller
+- ✅ Spin Spin, Minecraft Mode, Move Anything
+- ✅ Screen filters (Blur, Grayscale, Sepia, Hue Rotate, Brightness, Contrast)
+- ✅ Games (Breakout, Snake, Pong, Tetris, Space Shooter)
+- ✅ Custom JS runner
+- ✅ 5 color themes
+- ✅ Alt+Z to minimize (stealth mode)
+- ✅ Cache-busted (always loads latest version)
