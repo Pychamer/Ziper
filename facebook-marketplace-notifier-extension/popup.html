@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Marketplace Notifier</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        width: 320px;
+        margin: 12px;
+      }
+      label {
+        display: block;
+        margin-top: 10px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 4px;
+        padding: 8px;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      button {
+        flex: 1;
+        padding: 8px;
+        cursor: pointer;
+      }
+      #status {
+        margin-top: 10px;
+        font-size: 12px;
+      }
+      .muted {
+        color: #666;
+        font-size: 11px;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <label for="marketplaceUrl">Marketplace URL</label>
+    <input id="marketplaceUrl" type="url" placeholder="https://www.facebook.com/marketplace/..." />
+
+    <label for="webhookUrl">Webhook URL</label>
+    <input id="webhookUrl" type="url" placeholder="https://your-webhook.example" />
+
+    <label for="intervalSeconds">Refresh interval (seconds)</label>
+    <input id="intervalSeconds" type="number" min="6" max="3600" value="30" />
+
+    <div class="row">
+      <button id="startBtn">Save + Start</button>
+      <button id="stopBtn" type="button">Stop</button>
+    </div>
+
+    <div id="status"></div>
+    <div class="muted">This sends only title, URL, and price for new listings.</div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
