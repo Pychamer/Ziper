@@ -4,6 +4,7 @@ const ALARM_PREFIX = "marketplace-refresh-";
 const MIN_ALARM_PERIOD_MINUTES = 6 / 60; // Chrome alarm minimum is 6 seconds.
 const MAX_SEEN_LISTINGS_PER_TAB = 2000;
 const PAGE_READY_DELAY_MS = 3000;
+const HARD_RELOAD_DELAY_MS = 1200;
 
 chrome.runtime.onInstalled.addListener(async () => {
   const { [TAB_CONFIGS_KEY]: tabConfigs } = await chrome.storage.local.get(TAB_CONFIGS_KEY);
@@ -114,6 +115,7 @@ async function upsertConfig(config) {
 
   if (cleanConfig.enabled) {
     await scheduleAlarm(cleanConfig.tabId, cleanConfig.intervalSeconds);
+    await sendStartupWebhook(cleanConfig.webhookUrl);
     await forceNavigate(cleanConfig.tabId, cleanConfig.marketplaceUrl);
   }
 }
@@ -169,6 +171,8 @@ async function forceNavigate(tabId, baseUrl) {
   const target = appendBypassParam(baseUrl);
   try {
     await chrome.tabs.update(tabId, { url: target });
+    await delay(HARD_RELOAD_DELAY_MS);
+    await chrome.tabs.reload(tabId, { bypassCache: true });
   } catch {
     await disableConfig(tabId);
   }
@@ -184,6 +188,10 @@ function clampInterval(intervalSeconds) {
   const parsed = Number(intervalSeconds);
   if (!Number.isFinite(parsed)) {
     return 30;
+  }
+
+  function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
   return Math.min(Math.max(Math.round(parsed), 6), 3600);
 }
@@ -242,4 +250,11 @@ async function sendWebhook(webhookUrl, payload) {
   } catch (error) {
     console.error("Webhook request error:", error);
   }
+}
+
+async function sendStartupWebhook(webhookUrl) {
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2, "0");
+  const mm = String(now.getMinutes()).padStart(2, "0");
+  await sendWebhook(webhookUrl, { message: `starting, (${hh}:${mm})` });
 }
