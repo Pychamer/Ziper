@@ -6,6 +6,8 @@ const statusEl = document.getElementById("status");
 const startBtn = document.getElementById("startBtn");
 const stopBtn = document.getElementById("stopBtn");
 
+const FORM_PREFS_KEY = "popupFormPrefs";
+
 let activeTabId = null;
 
 bootstrap().catch((error) => setStatus(error.message, true));
@@ -26,6 +28,17 @@ async function bootstrap() {
 
   activeTabId = tab.id;
 
+  const prefs = await getFormPrefs();
+  if (prefs.marketplaceUrl) {
+    marketplaceUrlInput.value = prefs.marketplaceUrl;
+  }
+  if (prefs.webhookUrl) {
+    webhookUrlInput.value = prefs.webhookUrl;
+  }
+  if (Number.isFinite(prefs.intervalSeconds)) {
+    intervalSecondsInput.value = String(prefs.intervalSeconds);
+  }
+
   if (tab.url && tab.url.includes("facebook.com/marketplace")) {
     marketplaceUrlInput.value = tab.url;
   }
@@ -33,8 +46,8 @@ async function bootstrap() {
   const response = await sendMessage({ type: "getConfig", tabId: activeTabId });
   if (response?.config) {
     marketplaceUrlInput.value = response.config.marketplaceUrl || marketplaceUrlInput.value;
-    webhookUrlInput.value = response.config.webhookUrl || "";
-    intervalSecondsInput.value = String(response.config.intervalSeconds || 30);
+    webhookUrlInput.value = response.config.webhookUrl || webhookUrlInput.value;
+    intervalSecondsInput.value = String(response.config.intervalSeconds || intervalSecondsInput.value || 30);
     setStatus(response.config.enabled ? "Monitoring is ON." : "Monitoring is saved but OFF.");
   } else {
     setStatus("Set your URL + webhook, then start.");
@@ -50,6 +63,7 @@ async function saveAndStart() {
 
   validateInputs(marketplaceUrl, webhookUrl, intervalSeconds);
   await ensureWebhookPermission(webhookUrl);
+  await setFormPrefs({ marketplaceUrl, webhookUrl, intervalSeconds });
 
   await sendMessage({
     type: "upsertConfig",
@@ -138,4 +152,13 @@ function sendMessage(payload) {
       resolve(response);
     });
   });
+}
+
+async function getFormPrefs() {
+  const data = await chrome.storage.local.get(FORM_PREFS_KEY);
+  return data[FORM_PREFS_KEY] || {};
+}
+
+async function setFormPrefs(prefs) {
+  await chrome.storage.local.set({ [FORM_PREFS_KEY]: prefs });
 }

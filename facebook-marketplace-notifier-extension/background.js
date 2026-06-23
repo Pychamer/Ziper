@@ -102,7 +102,8 @@ async function upsertConfig(config) {
     marketplaceUrl: String(config.marketplaceUrl || "").trim(),
     webhookUrl: String(config.webhookUrl || "").trim(),
     intervalSeconds: clampInterval(config.intervalSeconds),
-    enabled: Boolean(config.enabled)
+    enabled: Boolean(config.enabled),
+    refreshToggleState: 0
   };
 
   if (!cleanConfig.marketplaceUrl || !cleanConfig.webhookUrl) {
@@ -110,6 +111,11 @@ async function upsertConfig(config) {
   }
 
   const tabConfigs = await getTabConfigs();
+  const existing = tabConfigs[String(cleanConfig.tabId)] || {};
+  cleanConfig.refreshToggleState = Number.isFinite(existing.refreshToggleState)
+    ? existing.refreshToggleState
+    : 0;
+
   tabConfigs[String(cleanConfig.tabId)] = cleanConfig;
   await chrome.storage.local.set({ [TAB_CONFIGS_KEY]: tabConfigs });
 
@@ -168,8 +174,8 @@ async function scheduleAlarm(tabId, intervalSeconds) {
 }
 
 async function forceNavigate(tabId, baseUrl) {
-  const target = appendBypassParam(baseUrl);
   try {
+    const target = await buildHardRefreshUrl(tabId, baseUrl);
     await chrome.tabs.update(tabId, { url: target });
     await delay(HARD_RELOAD_DELAY_MS);
     await chrome.tabs.reload(tabId, { bypassCache: true });
@@ -178,8 +184,29 @@ async function forceNavigate(tabId, baseUrl) {
   }
 }
 
-function appendBypassParam(baseUrl) {
+async function buildHardRefreshUrl(tabId, baseUrl) {
   const url = new URL(baseUrl);
+  const currentMaxPrice = url.searchParams.get("maxPrice");
+
+  if (currentMaxPrice !== null) {
+    const parsed = Number(currentMaxPrice);
+    if (Number.isFinite(parsed)) {
+      const tabConfigs = await getTabConfigs();
+      const key = String(tabId);
+      const config = tabConfigs[key];
+      const toggleState = Number.isFinite(config?.refreshToggleState) ? config.refreshToggleState : 0;
+      const effectiveMaxPrice = toggleState % 2 === 0 ? parsed : parsed + 1;
+
+      url.searchParams.set("maxPrice", String(effectiveMaxPrice));
+      if (config) {
+        config.refreshToggleState = toggleState + 1;
+        tabConfigs[key] = config;
+        await chrome.storage.local.set({ [TAB_CONFIGS_KEY]: tabConfigs });
+      }
+      return url.toString();
+    }
+  }
+
   url.searchParams.set("refresh_nonce", Date.now().toString());
   return url.toString();
 }
@@ -190,10 +217,11 @@ function clampInterval(intervalSeconds) {
     return 30;
   }
 
-  function delay(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
   return Math.min(Math.max(Math.round(parsed), 6), 3600);
+}
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function processListings(tabId, listings) {
@@ -253,8 +281,5 @@ async function sendWebhook(webhookUrl, payload) {
 }
 
 async function sendStartupWebhook(webhookUrl) {
-  const now = new Date();
-  const hh = String(now.getHours()).padStart(2, "0");
-  const mm = String(now.getMinutes()).padStart(2, "0");
-  await sendWebhook(webhookUrl, { message: `starting, (${hh}:${mm})` });
+  await sendWebhook(webhookUrl, { message: "FB NOTIFIER STARTED" });
 }
