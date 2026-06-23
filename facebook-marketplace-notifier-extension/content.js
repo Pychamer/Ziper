@@ -1,4 +1,8 @@
 let scanTimer = null;
+const SCAN_INTERVAL_MS = 15000;
+const MAX_TEXT_LINES = 20;
+const MIN_TITLE_LENGTH = 3;
+const MAX_TITLE_LENGTH = 120;
 
 initialize();
 
@@ -13,7 +17,7 @@ function initialize() {
   if (!scanTimer) {
     scanTimer = setInterval(() => {
       queueScan(0);
-    }, 15000);
+    }, SCAN_INTERVAL_MS);
   }
 }
 
@@ -86,7 +90,7 @@ function extractTextLines(container) {
     .split(/\n+/)
     .map((line) => line.trim())
     .filter(Boolean)
-    .slice(0, 20);
+    .slice(0, MAX_TEXT_LINES);
 }
 
 function findPrice(lines) {
@@ -102,7 +106,7 @@ function findTitle(lines, price) {
       if (!line || line === price) {
         return false;
       }
-      if (line.length < 3 || line.length > 120) {
+      if (line.length < MIN_TITLE_LENGTH || line.length > MAX_TITLE_LENGTH) {
         return false;
       }
       if (ignoredWords.some((word) => normalized.includes(word))) {

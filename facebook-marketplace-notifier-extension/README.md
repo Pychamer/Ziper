@@ -27,6 +27,7 @@
    - Webhook URL
    - Refresh interval (seconds)
 4. Click **Save + Start**.
+5. Approve the webhook host permission prompt when Chrome asks.
 
 ## Notes
 - Keep the monitored tab open.

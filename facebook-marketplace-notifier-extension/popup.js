@@ -49,6 +49,7 @@ async function saveAndStart() {
   const intervalSeconds = Number(intervalSecondsInput.value || 30);
 
   validateInputs(marketplaceUrl, webhookUrl, intervalSeconds);
+  await ensureWebhookPermission(webhookUrl);
 
   await sendMessage({
     type: "upsertConfig",
@@ -90,6 +91,23 @@ function validateInputs(marketplaceUrl, webhookUrl, intervalSeconds) {
 function ensureTabId() {
   if (!Number.isFinite(activeTabId)) {
     throw new Error("Active tab not found.");
+  }
+
+  function ensureWebhookPermission(webhookUrl) {
+    return new Promise((resolve, reject) => {
+      const originPattern = `${new URL(webhookUrl).origin}/*`;
+      chrome.permissions.request({ origins: [originPattern] }, (granted) => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(chrome.runtime.lastError.message));
+          return;
+        }
+        if (!granted) {
+          reject(new Error("Webhook permission denied."));
+          return;
+        }
+        resolve();
+      });
+    });
   }
 }
 

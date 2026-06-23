@@ -1,6 +1,8 @@
 const TAB_CONFIGS_KEY = "tabConfigs";
 const SEEN_LISTINGS_KEY = "seenListings";
 const ALARM_PREFIX = "marketplace-refresh-";
+const MIN_ALARM_PERIOD_MINUTES = 0.1;
+const MAX_SEEN_LISTINGS_PER_TAB = 2000;
 
 chrome.runtime.onInstalled.addListener(async () => {
   const { [TAB_CONFIGS_KEY]: tabConfigs } = await chrome.storage.local.get(TAB_CONFIGS_KEY);
@@ -158,7 +160,7 @@ async function scheduleAlarm(tabId, intervalSeconds) {
   const alarmName = getAlarmName(tabId);
   await chrome.alarms.clear(alarmName);
   chrome.alarms.create(alarmName, {
-    periodInMinutes: Math.max(intervalSeconds / 60, 0.1)
+    periodInMinutes: Math.max(intervalSeconds / 60, MIN_ALARM_PERIOD_MINUTES)
   });
 }
 
@@ -220,16 +222,23 @@ async function processListings(tabId, listings) {
     });
   }
 
-  seen[String(tabId)] = Array.from(tabSeen).slice(-2000);
+  seen[String(tabId)] = Array.from(tabSeen).slice(-MAX_SEEN_LISTINGS_PER_TAB);
   await chrome.storage.local.set({ [SEEN_LISTINGS_KEY]: seen });
 }
 
 async function sendWebhook(webhookUrl, payload) {
-  await fetch(webhookUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  });
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!response.ok) {
+      console.error("Webhook request failed:", response.status, response.statusText);
+    }
+  } catch (error) {
+    console.error("Webhook request error:", error);
+  }
 }
