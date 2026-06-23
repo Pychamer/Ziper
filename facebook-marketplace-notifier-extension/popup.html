@@ -4,61 +4,147 @@
     <meta charset="utf-8" />
     <title>Marketplace Notifier</title>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        width: 320px;
-        margin: 12px;
+      :root {
+        --bg-main: #f8b862;
+        --panel: #ffd88d;
+        --panel-2: #ffe7b5;
+        --accent: #e9667a;
+        --accent-2: #51c6b9;
+        --ink: #6c3a4a;
+        --muted: #8d6170;
+        --line: #f29ab0;
       }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        width: 340px;
+        padding: 12px;
+        font-family: "Trebuchet MS", "Comic Sans MS", "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: linear-gradient(180deg, #ffd47f 0%, var(--bg-main) 100%);
+      }
+
+      .shell {
+        background: var(--panel);
+        border: 3px solid #f09bb0;
+        border-radius: 14px;
+        padding: 10px;
+        box-shadow: 0 3px 0 #d78492;
+      }
+
+      .titlebar {
+        background: var(--accent);
+        color: #fff4ef;
+        border-radius: 10px;
+        padding: 8px 10px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        text-align: center;
+        text-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
+      }
+
+      .panel {
+        margin-top: 10px;
+        padding: 10px;
+        border: 2px solid #f3a1b5;
+        border-radius: 12px;
+        background: var(--panel-2);
+      }
+
       label {
         display: block;
-        margin-top: 10px;
+        margin-top: 8px;
+        margin-bottom: 4px;
         font-size: 12px;
-        font-weight: 600;
+        font-weight: 700;
+        color: var(--ink);
       }
+
       input {
         width: 100%;
-        box-sizing: border-box;
-        margin-top: 4px;
+        border: 2px solid var(--line);
+        border-radius: 9px;
         padding: 8px;
+        font-size: 12px;
+        color: var(--ink);
+        background: #fff8f2;
+        outline: none;
       }
+
+      input:focus {
+        border-color: #8f86df;
+        box-shadow: 0 0 0 2px rgba(143, 134, 223, 0.2);
+      }
+
       .row {
-        display: flex;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 8px;
         margin-top: 12px;
       }
+
       button {
-        flex: 1;
-        padding: 8px;
+        border: none;
+        border-radius: 10px;
+        padding: 9px 8px;
+        font-weight: 700;
         cursor: pointer;
+        color: #fff;
       }
+
+      #startBtn {
+        background: linear-gradient(180deg, #62d9c8 0%, var(--accent-2) 100%);
+        box-shadow: 0 3px 0 #2b9689;
+      }
+
+      #stopBtn {
+        background: linear-gradient(180deg, #f48a9a 0%, var(--accent) 100%);
+        box-shadow: 0 3px 0 #b94e63;
+      }
+
       #status {
         margin-top: 10px;
+        min-height: 16px;
         font-size: 12px;
+        font-weight: 700;
       }
+
       .muted {
-        color: #666;
-        font-size: 11px;
         margin-top: 8px;
+        padding-top: 8px;
+        border-top: 2px dashed #f0a5b8;
+        color: var(--muted);
+        font-size: 11px;
       }
     </style>
   </head>
   <body>
-    <label for="marketplaceUrl">Marketplace URL</label>
-    <input id="marketplaceUrl" type="url" placeholder="https://www.facebook.com/marketplace/..." />
+    <div class="shell">
+      <div class="titlebar">Facebook Marketplace Notifier</div>
 
-    <label for="webhookUrl">Webhook URL</label>
-    <input id="webhookUrl" type="url" placeholder="https://your-webhook.example" />
+      <div class="panel">
+        <label for="marketplaceUrl">Marketplace URL</label>
+        <input id="marketplaceUrl" type="url" placeholder="https://www.facebook.com/marketplace/..." />
 
-    <label for="intervalSeconds">Refresh interval (seconds)</label>
-    <input id="intervalSeconds" type="number" min="6" max="3600" value="30" />
+        <label for="webhookUrl">Webhook URL</label>
+        <input id="webhookUrl" type="url" placeholder="https://your-webhook.example" />
 
-    <div class="row">
-      <button id="startBtn">Save + Start</button>
-      <button id="stopBtn" type="button">Stop</button>
+        <label for="intervalSeconds">Refresh interval (seconds)</label>
+        <input id="intervalSeconds" type="number" min="6" max="3600" value="30" />
+
+        <div class="row">
+          <button id="startBtn">Save + Start</button>
+          <button id="stopBtn" type="button">Stop</button>
+        </div>
+
+        <div id="status"></div>
+        <div class="muted">Sends title, URL, and price for new listings.</div>
+      </div>
     </div>
-
-    <div id="status"></div>
-    <div class="muted">This sends only title, URL, and price for new listings.</div>
 
     <script src="popup.js"></script>
   </body>

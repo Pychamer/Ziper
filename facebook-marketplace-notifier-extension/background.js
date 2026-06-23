@@ -275,11 +275,20 @@ async function sendWebhook(webhookUrl, payload) {
     if (!response.ok) {
       console.error("Webhook request failed:", response.status, response.statusText);
     }
+    return response.ok;
   } catch (error) {
     console.error("Webhook request error:", error);
+    return false;
   }
 }
 
 async function sendStartupWebhook(webhookUrl) {
-  await sendWebhook(webhookUrl, { message: "FB NOTIFIER STARTED" });
+  const sent = await sendWebhook(webhookUrl, {
+    username: "FB Notifier",
+    content: "FB NOTIFIER STARTED"
+  });
+
+  if (!sent) {
+    await sendWebhook(webhookUrl, { message: "FB NOTIFIER STARTED" });
+  }
 }
