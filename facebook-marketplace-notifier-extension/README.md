@@ -17,8 +17,7 @@
 1. Open `chrome://extensions`
 2. Enable **Developer mode**
 3. Click **Load unpacked**
-4. Select this folder:
-   - `/home/runner/work/Ziper/Ziper/facebook-marketplace-notifier-extension`
+4. Select the `facebook-marketplace-notifier-extension` folder from this repository.
 
 ## Use
 1. Open the Marketplace page you want to monitor.

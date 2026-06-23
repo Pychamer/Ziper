@@ -72,7 +72,11 @@ async function stopMonitoring() {
 
 function validateInputs(marketplaceUrl, webhookUrl, intervalSeconds) {
   const marketplace = new URL(marketplaceUrl);
-  if (!marketplace.hostname.includes("facebook.com") || !marketplace.pathname.includes("/marketplace")) {
+  const isFacebookHost =
+    marketplace.hostname === "facebook.com" ||
+    marketplace.hostname === "www.facebook.com" ||
+    marketplace.hostname.endsWith(".facebook.com");
+  if (!isFacebookHost || !marketplace.pathname.includes("/marketplace")) {
     throw new Error("Marketplace URL must be a Facebook Marketplace link.");
   }
 

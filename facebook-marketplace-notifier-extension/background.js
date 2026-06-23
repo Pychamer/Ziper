@@ -173,7 +173,7 @@ async function forceNavigate(tabId, baseUrl) {
 
 function appendBypassParam(baseUrl) {
   const url = new URL(baseUrl);
-  url.searchParams.set("ziper_refresh", Date.now().toString());
+  url.searchParams.set("refresh_nonce", Date.now().toString());
   return url.toString();
 }
 
