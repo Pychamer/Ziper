@@ -1,8 +1,9 @@
 const TAB_CONFIGS_KEY = "tabConfigs";
 const SEEN_LISTINGS_KEY = "seenListings";
 const ALARM_PREFIX = "marketplace-refresh-";
-const MIN_ALARM_PERIOD_MINUTES = 0.1;
+const MIN_ALARM_PERIOD_MINUTES = 6 / 60; // Chrome alarm minimum is 6 seconds.
 const MAX_SEEN_LISTINGS_PER_TAB = 2000;
+const PAGE_READY_DELAY_MS = 3000;
 
 chrome.runtime.onInstalled.addListener(async () => {
   const { [TAB_CONFIGS_KEY]: tabConfigs } = await chrome.storage.local.get(TAB_CONFIGS_KEY);
@@ -85,7 +86,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
 
       setTimeout(() => {
         chrome.tabs.sendMessage(tabId, { type: "scanNow" }).catch(() => {});
-      }, 3000);
+      }, PAGE_READY_DELAY_MS);
     })
     .catch(() => {});
 });

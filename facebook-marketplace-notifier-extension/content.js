@@ -1,5 +1,5 @@
 let scanTimer = null;
-const SCAN_INTERVAL_MS = 15000;
+const CONTENT_SCAN_INTERVAL_MS = 15000;
 const MAX_TEXT_LINES = 20;
 const MIN_TITLE_LENGTH = 3;
 const MAX_TITLE_LENGTH = 120;
@@ -17,7 +17,7 @@ function initialize() {
   if (!scanTimer) {
     scanTimer = setInterval(() => {
       queueScan(0);
-    }, SCAN_INTERVAL_MS);
+    }, CONTENT_SCAN_INTERVAL_MS);
   }
 }
 
